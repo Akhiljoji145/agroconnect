@@ -1,0 +1,228 @@
+{% load expert_tags %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expert Registration - AgroConnect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            color: #111827;
+            background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1574943320219-553e18aeb5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 50px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .form-header h1 {
+            color: #1f2937;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .form-header p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-top: 16px;
+            color: #374151;
+        }
+
+        .form-control,
+        .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            margin-top: 6px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #059669;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+            outline: none;
+        }
+
+        .btn-primary {
+            margin-top: 24px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            background: #059669;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #047857;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(5, 150, 105, 0.3);
+        }
+
+        .alert {
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+
+        .required-field::after {
+            content: " *";
+            color: #ef4444;
+        }
+
+        .form-text {
+            font-size: 14px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
+        .back-link {
+            color: #059669;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 20px;
+        }
+
+        .back-link:hover {
+            color: #047857;
+            text-decoration: underline;
+        }
+
+        .form-section {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-section h5 {
+            color: #1f2937;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="form-header">
+            <h1 style="color: #064e3b;"><i class="fas fa-user-graduate"></i> Expert Registration</h1>
+            <p>Join our community of agricultural experts and help farmers grow better</p>
+        </div>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- Account Information -->
+            <div class="form-section">
+                <h5><i class="fas fa-user"></i> Account Information</h5>
+
+                {{ user_form.non_field_errors }}
+
+                <label for="id_username" class="form-label required-field">Username</label>
+                {{ user_form.username|add_class:"form-control" }}
+                <div class="form-text">Choose a unique username for your account</div>
+
+                <label for="id_password1" class="form-label required-field">Password</label>
+                {{ user_form.password1|add_class:"form-control" }}
+                <div class="form-text">Minimum 8 characters with letters and numbers</div>
+
+                <label for="id_password2" class="form-label required-field">Confirm Password</label>
+                {{ user_form.password2|add_class:"form-control" }}
+            </div>
+
+            <!-- Professional Information -->
+            <div class="form-section">
+                <h5><i class="fas fa-briefcase"></i> Professional Information</h5>
+
+                <label for="id_specialization" class="form-label required-field">Specialization</label>
+                {{ expert_form.specialization }}
+                <div class="form-text">Select your area of expertise</div>
+
+                <label for="id_qualifications" class="form-label required-field">Qualifications</label>
+                {{ expert_form.qualifications }}
+                <div class="form-text">Include degrees, certifications, and specialized training</div>
+
+                <label for="id_experience_years" class="form-label required-field">Experience (Years)</label>
+                {{ expert_form.experience_years }}
+                <div class="form-text">How many years of experience do you have in this field?</div>
+
+                <label for="id_bio" class="form-label required-field">Professional Bio</label>
+                {{ expert_form.bio }}
+                <div class="form-text">Share your background and what makes you unique as an expert</div>
+            </div>
+
+            <!-- Contact & Business Information -->
+            <div class="form-section">
+                <h5><i class="fas fa-phone"></i> Contact & Business Information</h5>
+
+                <label for="id_phone_number" class="form-label">Phone Number</label>
+                {{ expert_form.phone_number }}
+                <div class="form-text">Optional - for important notifications</div>
+
+                <label for="id_location" class="form-label">Location</label>
+                {{ expert_form.location }}
+                <div class="form-text">Optional - helps farmers find local experts</div>
+
+                <label for="id_consultation_fee" class="form-label">Consultation Fee</label>
+                {{ expert_form.consultation_fee }}
+                <div class="form-text">Set your consultation fee (leave 0 for free consultations)</div>
+            </div>
+
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-check-circle"></i> Create Expert Account
+            </button>
+        </form>
+
+        <div class="text-center">
+            <a href="/login/" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Login
+            </a>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

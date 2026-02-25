@@ -1,0 +1,270 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrastyle %}{{ block.super }}
+<style>
+    .dashboard-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin: 20px 0;
+    }
+    .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    .stat-label {
+        font-size: 1rem;
+        opacity: 0.9;
+    }
+    .stat-percentage {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin-top: 5px;
+    }
+    .card-pending {
+        background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+    }
+    .card-verified {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    .card-rejected {
+        background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%);
+    }
+    .card-total {
+        background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+    }
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 30px 0 20px;
+        color: #1f2937;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 10px;
+    }
+    .table-container {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        margin: 20px 0;
+    }
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .status-pending {
+        background-color: #fef3c7;
+        color: #92400e;
+    }
+    .status-verified {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    .status-rejected {
+        background-color: #fee2e2;
+        color: #991b1b;
+    }
+    .specialization-chart {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        margin: 20px 0;
+    }
+    .progress-bar {
+        background-color: #e5e7eb;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 5px 0;
+    }
+    .progress-fill {
+        height: 8px;
+        background: linear-gradient(90deg, #10b981, #059669);
+        transition: width 0.3s ease;
+    }
+    .action-buttons {
+        margin: 20px 0;
+        display: flex;
+        gap: 10px;
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: transform 0.2s ease;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="/admin/">Home</a> &rsaquo; Expert Verification Dashboard
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>🏆 Expert Verification Dashboard</h1>
+    
+    <!-- Statistics Cards -->
+    <div class="dashboard-container">
+        <div class="stat-card card-total">
+            <div class="stat-number">{{ total_experts }}</div>
+            <div class="stat-label">Total Experts</div>
+            <div class="stat-percentage">{{ recent_registrations }} new this month</div>
+        </div>
+        
+        <div class="stat-card card-pending">
+            <div class="stat-number">{{ pending_experts }}</div>
+            <div class="stat-label">Pending Verification</div>
+            <div class="stat-percentage">{{ pending_percentage }}%</div>
+        </div>
+        
+        <div class="stat-card card-verified">
+            <div class="stat-number">{{ verified_experts }}</div>
+            <div class="stat-label">Verified Experts</div>
+            <div class="stat-percentage">{{ verified_percentage }}%</div>
+        </div>
+        
+        <div class="stat-card card-rejected">
+            <div class="stat-number">{{ rejected_experts }}</div>
+            <div class="stat-label">Rejected Experts</div>
+            <div class="stat-percentage">{{ rejected_percentage }}%</div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="/admin/expert/expertprofile/" class="btn-primary">
+            🔍 Manage All Experts
+        </a>
+        <a href="/admin/expert/expertprofile/?verification_status__exact=pending" class="btn-primary">
+            ⏳ View Pending Experts
+        </a>
+    </div>
+
+    <!-- Pending Experts Table -->
+    <div class="section-title">⏳ Experts Pending Verification</div>
+    <div class="table-container">
+        {% if pending_experts_list %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Expert</th>
+                        <th>Specialization</th>
+                        <th>Experience</th>
+                        <th>Location</th>
+                        <th>Registration Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expert in pending_experts_list %}
+                    <tr>
+                        <td>
+                            <strong>{{ expert.user.username }}</strong><br>
+                            <small class="text-muted">{{ expert.user.email }}</small>
+                        </td>
+                        <td>{{ expert.get_specialization_display }}</td>
+                        <td>{{ expert.experience_years }} years</td>
+                        <td>{{ expert.location }}</td>
+                        <td>{{ expert.created_at|date:"M d, Y" }}</td>
+                        <td>
+                            <a href="/admin/expert/expertprofile/{{ expert.id }}/change/" class="btn btn-sm btn-primary">
+                                Review
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-center text-muted">No experts pending verification! 🎉</p>
+        {% endif %}
+    </div>
+
+    <!-- Recent Verifications -->
+    <div class="section-title">📋 Recent Verification Actions</div>
+    <div class="table-container">
+        {% if recent_verifications %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Expert</th>
+                        <th>Status</th>
+                        <th>Last Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expert in recent_verifications %}
+                    <tr>
+                        <td>
+                            <strong>{{ expert.user.username }}</strong><br>
+                            <small class="text-muted">{{ expert.get_specialization_display }}</small>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ expert.verification_status }}">
+                                {{ expert.get_verification_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ expert.updated_at|date:"M d, Y H:i" }}</td>
+                        <td>
+                            <a href="/admin/expert/expertprofile/{{ expert.id }}/change/" class="btn btn-sm btn-secondary">
+                                View Details
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-center text-muted">No recent verification actions.</p>
+        {% endif %}
+    </div>
+
+    <!-- Specialization Statistics -->
+    <div class="section-title">📊 Expert Specialization Breakdown</div>
+    <div class="specialization-chart">
+        {% for stat in specialization_stats %}
+            <div style="margin-bottom: 15px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                    <strong>{{ stat.specialization__title|default:"Unknown" }}</strong>
+                    <span>{{ stat.count }} experts</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ stat.count|mul:100|div:total_experts }}%"></div>
+                </div>
+                <div style="display: flex; gap: 20px; font-size: 0.9rem; margin-top: 5px;">
+                    <span>✅ {{ stat.verified }} verified</span>
+                    <span>⏳ {{ stat.pending }} pending</span>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

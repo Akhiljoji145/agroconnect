@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agro Connect Smart Platform</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            overflow-x: hidden;
+            background: #ffffff;
+            color: #1a1a1a;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e5e7eb;
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        }
+
+        .nav-wrapper {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            height: 72px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .logo:hover {
+            opacity: 0.8;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .nav-item {
+            padding: 0.625rem 1rem;
+            color: #6b7280;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            letter-spacing: -0.01em;
+        }
+
+        .nav-item:hover {
+            color: #059669;
+            background: #f0fdf4;
+        }
+
+        .nav-item.login-btn {
+            background: #059669;
+            color: white;
+            margin-left: 0.5rem;
+        }
+
+        .nav-item.login-btn:hover {
+            background: #047857;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 120px 2rem 80px;
+            position: relative;
+            overflow: hidden;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                              url('https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .hero-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-title {
+            font-size: 56px;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-subtitle {
+            font-size: 20px;
+            color: #e5e7eb;
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+            font-weight: 400;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.875rem 1.75rem;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            letter-spacing: -0.01em;
+        }
+
+        .btn-primary {
+            background: #059669;
+            color: white;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #047857;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #059669;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 100px 2rem;
+            background: white;
+        }
+
+        .features-container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto 4rem;
+        }
+
+        .section-title {
+            font-size: 40px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .section-description {
+            font-size: 18px;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s;
+        }
+
+        .feature-card:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            transform: translateY(-2px);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: #f0fdf4;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 1.25rem;
+        }
+
+        .feature-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.01em;
+        }
+
+        .feature-description {
+            font-size: 15px;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        /* About Page */
+        .about-page {
+            min-height: 100vh;
+            padding: 120px 2rem 80px;
+            background: #f9fafb;
+        }
+
+        .about-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 4rem;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        .about-container h1 {
+            font-size: 44px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 2rem;
+            letter-spacing: -0.02em;
+        }
+
+        .about-text {
+            font-size: 17px;
+            color: #4b5563;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .values-section {
+            margin-top: 3rem;
+            padding-top: 3rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .values-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        .value-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: #f9fafb;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .value-icon {
+            font-size: 32px;
+            margin-bottom: 0.75rem;
+        }
+
+        .value-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2.5rem;
+            padding: 0.75rem 1.5rem;
+            background: white;
+            color: #1a1a1a;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .back-button:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        /* Login Selection Page */
+        .login-selection {
+            min-height: 100vh;
+            padding: 120px 2rem 80px;
+            background: #f9fafb;
+        }
+
+        .login-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 4rem;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 3.5rem;
+        }
+
+        .login-header h1 {
+            font-size: 40px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.02em;
+        }
+
+        .login-header p {
+            font-size: 18px;
+            color: #6b7280;
+        }
+
+        .role-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .role-card {
+            background: #f9fafb;
+            padding: 3rem;
+            border-radius: 12px;
+            border: 2px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .role-card:hover {
+            border-color: #059669;
+            background: white;
+            box-shadow: 0 8px 32px rgba(5, 150, 105, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .role-icon {
+            width: 72px;
+            height: 72px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            margin-bottom: 1.5rem;
+        }
+
+        .role-card:hover .role-icon {
+            background: #f0fdf4;
+            border-color: #059669;
+        }
+
+        .role-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 0.75rem;
+            letter-spacing: -0.01em;
+        }
+
+        .role-description {
+            font-size: 15px;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        /* Auth Pages */
+        .auth-page {
+            min-height: 100vh;
+            padding: 120px 2rem 80px;
+            background: #f9fafb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-box {
+            max-width: 480px;
+            width: 100%;
+            background: white;
+            padding: 3rem;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .auth-icon {
+            width: 64px;
+            height: 64px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-box h1 {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .auth-subtitle {
+            font-size: 16px;
+            color: #6b7280;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 15px;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #059669;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 0.875rem;
+            background: #059669;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        .submit-button:hover {
+            background: #047857;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+        }
+
+        .auth-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #6b7280;
+            font-size: 14px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .auth-link:hover {
+            color: #059669;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .role-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .values-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-wrapper {
+                padding: 0 1rem;
+                height: 64px;
+            }
+
+            .nav-menu {
+                gap: 0.25rem;
+            }
+
+            .nav-item {
+                padding: 0.5rem 0.75rem;
+                font-size: 14px;
+            }
+
+            .hero-title {
+                font-size: 36px;
+            }
+
+            .hero-subtitle {
+                font-size: 18px;
+            }
+
+            .section-title {
+                font-size: 32px;
+            }
+
+            .about-container,
+            .login-container,
+            .auth-box {
+                padding: 2rem;
+            }
+
+            .values-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-wrapper">
+            <div class="logo" onclick="showPage('home')">
+                <div class="logo-icon">🌾</div>
+                <span class="logo-text">Agro Connect</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item" onclick="showPage('home')">Home</li>
+                <li class="nav-item" onclick="showPage('about')">About</li>
+                <li class="nav-item" onclick="showPage('home'); setTimeout(scrollToFeatures, 100)">Services</li>
+                <li class="nav-item" onclick="showContact()">Contact</li>
+                <li class="nav-item login-btn" onclick="window.location.href='/login/'">Login</li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Home Page -->
+    <div id="home" class="page active">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-container">
+                <div class="hero-content">
+                    <h1 class="hero-title">Agro Connect Smart Platform</h1>
+                    <p class="hero-subtitle">Connecting Farmers and Consumers Through Technology. Fresh Produce, Fair Prices, and Expert Guidance All in One Place.</p>
+                    <div class="hero-buttons">
+                        <button class="btn btn-primary" onclick="window.location.href='/login/'">Get Started</button>
+                        <button class="btn btn-secondary" onclick="showPage('about')">Learn More</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features" id="features">
+    <div id="about" class="page">
+        <section class="about-page">
+            <div class="about-container">
+                <h1>About Agro Connect</h1>
+                <p class="about-text">
+                    Agro Connect is a smart agricultural platform that bridges the gap between farmers and consumers through innovative technology. We leverage artificial intelligence and machine learning to create a transparent, efficient marketplace.
+                </p>
+                <p class="about-text">
+                    Our mission is to empower farmers with direct market access, fair pricing, and expert guidance while providing consumers with fresh, quality produce from trusted local sources.
+                </p>
+                <p class="about-text">
+                    We believe technology should serve everyone. That's why we've built a platform that's both powerful and easy to use, ensuring farmers of all backgrounds can benefit from digital agriculture.
+                </p>
+                
+                <div class="values-section">
+                    <h3 class="values-title">Our Core Values</h3>
+                    <div class="values-grid">
+                        <div class="value-item">
+                            <div class="value-icon">🤝</div>
+                            <div class="value-title">Trust</div>
+                        </div>
+                        <div class="value-item">
+                            <div class="value-icon">💡</div>
+                            <div class="value-title">Innovation</div>
+                        </div>
+                        <div class="value-item">
+                            <div class="value-icon">🌍</div>
+                            <div class="value-title">Sustainability</div>
+                        </div>
+                        <div class="value-item">
+                            <div class="value-icon">✨</div>
+                            <div class="value-title">Simplicity</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="back-button" onclick="showPage('home')">
+                    <span>←</span>
+                    <span>Back to Home</span>
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Login Selection Page -->
+    <div id="login" class="page">
+        <section class="login-selection">
+            <div class="login-container">
+                <div class="login-header">
+                    <h1>Select Account Type</h1>
+                    <p>Choose how you want to access Agro Connect</p>
+                </div>
+
+                <div class="role-grid">
+                    <div class="role-card" onclick="showPage('farmer-login')">
+                        <div class="role-icon">👨‍🌾</div>
+                        <h3 class="role-title">Farmer Login</h3>
+                        <p class="role-description">Access your dashboard to manage produce, view orders, and connect with buyers.</p>
+                    </div>
+                    <div class="role-card" onclick="showPage('consumer-login')">
+                        <div class="role-icon">🛒</div>
+                        <h3 class="role-title">Consumer Login</h3>
+                        <p class="role-description">Browse fresh produce, place orders, and connect with local farmers.</p>
+                    </div>
+                    <div class="role-card" onclick="showPage('supplier-login')">
+                        <div class="role-icon">🏪</div>
+                        <h3 class="role-title">Supplier Login</h3>
+                        <p class="role-description">Access your supplier dashboard to manage products and orders.</p>
+                    </div>
+                    <div class="role-card" onclick="window.location.href='/expert/register/'">
+                        <div class="role-icon">👨‍🌾</div>
+                        <h3 class="role-title">Expert Registration</h3>
+                        <p class="role-description">Join as agricultural expert and provide consultation services.</p>
+                    </div>
+                </div>
+
+                <button class="back-button" onclick="showPage('home')" style="display: block; margin: 0 auto;">
+                    <span>←</span>
+                    <span>Back to Home</span>
+                </button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Farmer Login Page -->
+    <div id="farmer-login" class="page">
+        <section class="auth-page">
+            <div class="auth-box">
+                <div class="auth-header">
+                    <div class="auth-icon">👨‍🌾</div>
+                    <h1>Farmer Login</h1>
+                    <p class="auth-subtitle">Access your farming dashboard</p>
+                </div>
+
+                <form onsubmit="handleFarmerLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label">Farmer ID or Mobile Number</label>
+                        <input type="text" class="form-input" id="farmerId" placeholder="Enter your ID or mobile" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-input" id="farmerPassword" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="submit-button">Sign In</button>
+                </form>
+
+                <div class="auth-link" onclick="window.location.href='/farmer/register/'">Register as Farmer</div>
+                <div class="auth-link" onclick="showPage('login')">← Choose different account</div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Consumer Login Page -->
+    <div id="consumer-login" class="page">
+        <section class="auth-page">
+            <div class="auth-box">
+                <div class="auth-header">
+                    <div class="auth-icon">🛒</div>
+                    <h1>Consumer Login</h1>
+                    <p class="auth-subtitle">Start shopping fresh produce</p>
+                </div>
+
+                <form onsubmit="handleConsumerLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label">Name or Mobile Number</label>
+                        <input type="text" class="form-input" id="consumerName" placeholder="Enter your name or mobile" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-input" id="consumerPassword" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="submit-button">Sign In</button>
+                </form>
+
+                <div class="auth-link" onclick="window.location.href='/consumer/register/'">Register as Consumer</div>
+                <div class="auth-link" onclick="showPage('login')">← Choose different account</div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Supplier Login Page -->
+    <div id="supplier-login" class="page">
+        <section class="auth-page">
+            <div class="auth-box">
+                <div class="auth-header">
+                    <div class="auth-icon">🏪</div>
+                    <h1>Supplier Login</h1>
+                    <p class="auth-subtitle">Access your supplier dashboard</p>
+                </div>
+
+                <form onsubmit="handleSupplierLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label">Business Email or Mobile</label>
+                        <input type="text" class="form-input" id="supplierEmail" placeholder="Enter your business email or mobile" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-input" id="supplierPassword" placeholder="Enter your password" required>
+                    </div>
+                    <button type="submit" class="submit-button">Sign In</button>
+                </form>
+
+                <div class="auth-link" onclick="window.location.href='/supplier/register/'">Register as Supplier</div>
+                <div class="auth-link" onclick="showPage('login')">← Choose different account</div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            const page = document.getElementById(pageId);
+            if (page) {
+                page.classList.add('active');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        function scrollToFeatures() {
+            document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showContact() {
+            alert('Contact Us\n\nEmail: support@agroconnect.com\nPhone: +91 123-456-7890\nHours: Mon-Sat, 9 AM - 6 PM');
+        }
+
+        function handleFarmerLogin(event) {
+            event.preventDefault();
+            const farmerId = document.getElementById('farmerId').value;
+            alert('Welcome Farmer!\n\nLogging you in...\nID: ' + farmerId);
+        }
+
+        function handleConsumerLogin(event) {
+            event.preventDefault();
+            const consumerName = document.getElementById('consumerName').value;
+            alert('Welcome!\n\nLogging you in...\nName: ' + consumerName);
+        }
+
+        function handleSupplierLogin(event) {
+            event.preventDefault();
+            const supplierEmail = document.getElementById('supplierEmail').value;
+            alert('Welcome Supplier!\n\nLogging you in...\nEmail: ' + supplierEmail);
+        }
+    </script>
+</body>
+</html>

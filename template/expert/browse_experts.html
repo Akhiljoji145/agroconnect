@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Experts</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f8fafc; margin: 0; color: #0f172a; }
+        header { background: #7c3aed; color: #fff; padding: 24px; }
+        header h1 { margin: 0 0 6px; }
+        .container { max-width: 1200px; margin: 24px auto; padding: 0 16px; }
+        .card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+        h2 { margin-top: 0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .expert-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+        .expert-name { font-size: 18px; font-weight: 600; color: #0f172a; margin-bottom: 8px; }
+        .expert-specialization { color: #64748b; margin-bottom: 12px; }
+        .expert-bio { color: #475569; margin-bottom: 16px; line-height: 1.5; }
+        .expert-stats { display: flex; gap: 16px; margin-bottom: 16px; }
+        .stat { text-align: center; }
+        .stat-number { font-size: 16px; font-weight: 600; color: #059669; }
+        .stat-label { font-size: 12px; color: #64748b; }
+        .badge { display: inline-block; padding: 4px 8px; border-radius: 999px; font-size: 12px; background: #ede9fe; color: #059669; }
+        button { padding: 8px 16px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-primary { background: #7c3aed; color: white; }
+        .btn-primary:hover { background: #6d28d9; }
+        .btn-secondary { background: #e2e8f0; color: #475569; }
+        .btn-secondary:hover { background: #cbd5e0; }
+        .filter-form { margin-bottom: 24px; }
+        .filter-form select { padding: 8px 12px; border: 1px solid #cbd5e0; border-radius: 8px; }
+        .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 24px; }
+        .pagination a { padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #475569; }
+        .pagination a.active { background: #7c3aed; color: white; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Browse Agricultural Experts</h1>
+        <div class="top-links">
+            <a href="/logout/">Logout</a>
+            <a href="{% url 'farmer:dashboard' %}">Dashboard</a>
+            <a href="/">Home</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>Find Expert Help</h2>
+            
+            <!-- Filter Form -->
+            <form method="get" class="filter-form">
+                <label for="specialization">Filter by Specialization:</label>
+                <select name="specialization" id="specialization" onchange="this.form.submit()">
+                    <option value="">All Specializations</option>
+                    {% for value, label in specializations %}
+                        <option value="{{ value }}" {% if request.GET.specialization == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+
+            <!-- Experts Grid -->
+            <div class="grid">
+                {% for expert in experts %}
+                    <div class="expert-card">
+                        <div class="expert-name">{{ expert.user.username }}</div>
+                        <div class="expert-specialization">{{ expert.get_specialization_display }}</div>
+                        <div class="expert-bio">{{ expert.bio|truncatewords:15 }}</div>
+                        
+                        <div class="expert-stats">
+                            <div class="stat">
+                                <div class="stat-number">{{ expert.average_rating|floatformat:1 }}</div>
+                                <div class="stat-label">Rating</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-number">{{ expert.experience_years }}</div>
+                                <div class="stat-label">Years</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-number">{{ expert.total_consultations }}</div>
+                                <div class="stat-label">Consultations</div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 16px;">
+                            <span class="badge">{{ expert.get_verification_status_display }}</span>
+                            <span style="margin-left: 8px; color: #64748b;">₹{{ expert.consultation_fee }}/session</span>
+                        </div>
+
+                        <div style="display: flex; gap: 8px;">
+                            <a href="{% url 'expert:expert_reviews' expert.id %}" class="btn-secondary">
+                                View Reviews
+                            </a>
+                            {% if user.is_authenticated and user.farmer_profile %}
+                                <a href="{% url 'expert:request_consultation' expert.id %}" class="btn-primary">
+                                    Request Consultation
+                                </a>
+                            {% else %}
+                                <a href="/login/" class="btn-secondary">
+                                    Login to Request
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #64748b;">
+                        <h3>No experts found</h3>
+                        <p>Try adjusting your filters or check back later.</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if experts.has_other_pages %}
+                <div class="pagination">
+                    {% if experts.has_previous %}
+                        <a href="?page={{ experts.previous_page_number }}">Previous</a>
+                    {% endif %}
+                    
+                    {% for num in experts.paginator.page_range %}
+                        {% if experts.number == num %}
+                            <a href="#" class="active">{{ num }}</a>
+                        {% elif num > experts.number|add:'-3' and num < experts.number|add:'3' %}
+                            <a href="?page={{ num }}">{{ num }}</a>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if experts.has_next %}
+                        <a href="?page={{ experts.next_page_number }}">Next</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

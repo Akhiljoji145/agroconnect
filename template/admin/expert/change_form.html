@@ -1,0 +1,164 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}{{ block.super }}
+<style>
+    .verification-status {
+        padding: 10px;
+        border-radius: 5px;
+        margin: 10px 0;
+        font-weight: bold;
+    }
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+    .status-verified {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    .status-rejected {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    .verification-actions {
+        margin: 15px 0;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 5px;
+        border: 1px solid #e9ecef;
+    }
+    .document-preview {
+        margin: 10px 0;
+        padding: 10px;
+        background-color: #ffffff;
+        border: 1px solid #dee2e6;
+        border-radius: 5px;
+    }
+    .expert-info {
+        background-color: #e7f3ff;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 10px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    {% block object-tools %}{% endblock %}
+    
+    <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post" id="{{ opts.model_name }}_form" novalidate>
+        {% csrf_token %}
+        {% block form_top %}{% endblock %}
+        <div>
+            {% if is_popup %}
+                <input type="hidden" name="{{ is_popup_var }}" value="1">
+            {% endif %}
+            
+            <!-- Expert Verification Status Display -->
+            {% if original and original.verification_status %}
+                <div class="verification-status status-{{ original.verification_status }}">
+                    {% if original.verification_status == 'pending' %}
+                        ⏳ Verification Status: PENDING - Admin review required
+                    {% elif original.verification_status == 'verified' %}
+                        ✅ Verification Status: VERIFIED - Expert is approved
+                    {% elif original.verification_status == 'rejected' %}
+                        ❌ Verification Status: REJECTED - Expert not approved
+                    {% endif %}
+                </div>
+            {% endif %}
+            
+            <!-- Expert Information -->
+            {% if original %}
+                <div class="expert-info">
+                    <h4>Expert Information</h4>
+                    <p><strong>Username:</strong> {{ original.user.username }}</p>
+                    <p><strong>Email:</strong> {{ original.user.email }}</p>
+                    <p><strong>Specialization:</strong> {{ original.get_specialization_display }}</p>
+                    <p><strong>Experience:</strong> {{ original.experience_years }} years</p>
+                    <p><strong>Location:</strong> {{ original.location }}</p>
+                    <p><strong>Consultation Fee:</strong> ₹{{ original.consultation_fee }}</p>
+                    <p><strong>Registration Date:</strong> {{ original.created_at|date:"F d, Y" }}</p>
+                </div>
+            {% endif %}
+            
+            <!-- Verification Documents -->
+            {% if original and verification_documents %}
+                <div class="document-preview">
+                    <h4>Verification Documents</h4>
+                    {% if verification_documents %}
+                        <p><strong>Document:</strong> 
+                            <a href="{{ verification_documents.url }}" target="_blank" class="button">
+                                📄 View Verification Document
+                            </a>
+                        </p>
+                    {% else %}
+                        <p><em>No verification document uploaded</em></p>
+                    {% endif %}
+                </div>
+            {% endif %}
+            
+            <!-- Verification Actions -->
+            {% if original and original.verification_status == 'pending' %}
+                <div class="verification-actions">
+                    <h4>Verification Actions</h4>
+                    <p><strong>Current Status:</strong> This expert is pending verification.</p>
+                    <p>Please review the expert's qualifications and uploaded documents before approving.</p>
+                    
+                    <div style="margin-top: 15px;">
+                        <label style="display: block; margin-bottom: 10px;">
+                            <input type="checkbox" name="auto_verify" value="verified">
+                            <strong>Approve Expert</strong> - Mark this expert as verified
+                        </label>
+                        
+                        <label style="display: block; margin-bottom: 10px;">
+                            <input type="checkbox" name="auto_reject" value="rejected">
+                            <strong>Reject Expert</strong> - Mark this expert as rejected
+                        </label>
+                        
+                        <p style="font-size: 0.9em; color: #666; margin-top: 10px;">
+                            💡 You can also use the dropdown below to change status manually.
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
+            
+            <!-- Form Fields -->
+            {% if errors %}
+                <p class="errornote">
+                    {% block errors %}{{ errors }}{% endblock %}
+                </p>
+            {% endif %}
+            
+            {% block field_sets %}
+                {% for fieldset in adminform %}
+                    {% include "admin/includes/fieldset.html" %}
+                {% endfor %}
+            {% endblock %}
+            
+            {% block after_field_sets %}{% endblock %}
+            
+            {% block submit_buttons_bottom %}
+                <div class="submit-row">
+                    <input type="submit" value="{% if 'save' in actions %}Save and continue editing{% else %}Save{% endif %}" class="default" name="_save">
+                    {% if can_change %}
+                        <input type="submit" value="Save and add another" name="_addanother">
+                    {% endif %}
+                    {% if can_change and has_change_permission %}
+                        <input type="submit" value="Save and continue editing" name="_continue">
+                    {% endif %}
+                    {% if can_delete and has_delete_permission %}
+                        <input type="submit" value="Delete" name="_delete" class="deletelink">
+                    {% endif %}
+                </div>
+            {% endblock %}
+            
+            {% block submit_buttons_top %}{% endblock %}
+        </div>
+    </form>
+</div>
+{% endblock %}

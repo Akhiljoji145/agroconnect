@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Dashboard - AgroConnect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0fdf4;
+            margin: 0;
+            color: #0f172a;
+        }
+
+        .navbar {
+            background: rgba(5, 150, 105, 0.95);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .navbar-brand,
+        .nav-link {
+            font-weight: 700;
+            color: #fff !important;
+        }
+
+        .nav-link {
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .nav-link:hover {
+            opacity: 1;
+        }
+
+        /* Hero Section for User */
+        .dashboard-hero {
+            background: linear-gradient(rgba(5, 150, 105, 0.7), rgba(4, 120, 87, 0.8)), url('https://images.unsplash.com/photo-1592982537447-6f2a6a0c5c1b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center;
+            background-size: cover;
+            padding: 60px 0;
+            color: white;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            margin-bottom: 10px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container-main {
+            max-width: 1400px;
+            padding: 0 20px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 16px;
+            padding: 24px;
+            border: none;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+            height: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header-custom {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .card-header-custom h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #064e3b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-header-custom i {
+            color: #059669;
+            font-size: 1.4rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-top: 12px;
+            color: #334155;
+            font-size: 0.9rem;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px 14px;
+            margin-top: 6px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: #059669;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+        }
+
+        .btn-custom {
+            margin-top: 16px;
+            padding: 12px 20px;
+            background: #059669;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn-custom:hover {
+            background: #047857;
+            transform: translateY(-1px);
+            color: #fff;
+        }
+
+        .btn-secondary-custom {
+            background: #f1f5f9;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+        }
+
+        .btn-secondary-custom:hover {
+            background: #e2e8f0;
+            color: #0f172a;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 10px;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        td {
+            text-align: left;
+            border-bottom: 1px solid #f1f5f9;
+            padding: 14px 10px;
+            font-size: 0.95rem;
+            color: #334155;
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .list li:last-child {
+            border-bottom: none;
+        }
+
+        .list li i {
+            color: #059669;
+            margin-top: 4px;
+        }
+
+        .badge-custom {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: #ecfdf5;
+            color: #059669;
+            border: 1px solid #d1fae5;
+        }
+
+        /* Chat styles */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 400px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .chat-message {
+            display: flex;
+            flex-direction: column;
+            max-width: 80%;
+        }
+
+        .chat-message.own {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .chat-message.other {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        .chat-bubble {
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .chat-message.own .chat-bubble {
+            background: #059669;
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-message.other .chat-bubble {
+            background: #fff;
+            color: #334155;
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-meta {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 4px;
+            margin-bottom: 2px;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            background: #fff;
+            border-top: 1px solid #e2e8f0;
+            align-items: center;
+        }
+
+        .chat-input-area input[type="text"] {
+            margin-top: 0;
+            flex-grow: 1;
+        }
+
+        .chat-file-upload {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            background: #f1f5f9;
+            border-radius: 10px;
+            cursor: pointer;
+            color: #64748b;
+            transition: background 0.2s;
+        }
+
+        .chat-file-upload:hover {
+            background: #e2e8f0;
+            color: #059669;
+        }
+
+        .chat-file-upload input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            height: 100%;
+        }
+
+        .chat-file-indicator {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: #ef4444;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: none;
+        }
+
+        .chat-fullscreen-card {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9999;
+            margin: 0;
+            border-radius: 0;
+        }
+
+        .chat-fullscreen-card .chat-container {
+            height: calc(100vh - 150px);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="{% url 'farmer:dashboard' %}">
+                <i class="fas fa-seedling"></i> AgroConnect
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'farmer:dashboard' %}"><i
+                                class="fas fa-home"></i> Dashboard</a></li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="/"><i class="fas fa-globe"></i> Main Site</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/logout/"><i class="fas fa-sign-out-alt"></i>
+                            Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dashboard-hero">
+        <div class="container text-center">
+            <h1 class="hero-title">Welcome back, {{ farmer.user.username }}</h1>
+            <p class="hero-subtitle">Manage your farm, inventory, and insights all in one place</p>
+        </div>
+    </div>
+
+    <div class="container-main mb-5">
+        {% if messages %}
+        <div class="row mb-4">
+            <div class="col-12">
+                {% for message in messages %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert"
+                    style="background-color: #ecfdf5; border-color: #a7f3d0; color: #065f46; border-radius: 12px; font-weight: 500;">
+                    <i class="fas fa-check-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row g-4 d-flex align-items-stretch">
+            <!-- Soil Analysis -->
+            <div class="col-lg-4 col-md-6 d-flex">
+                <div class="card w-100">
+                    <div class="card-header-custom">
+                        <h2><i class="fas fa-flask"></i> Soil Analysis</h2>
+                    </div>
+                    <form method="post" class="mb-4">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="soil_analysis">
+                        <div class="row g-2">
+                            <div class="col-4">
+                                <label>Soil pH</label>
+                                <input type="number" step="0.01" name="ph" required placeholder="pH value">
+                            </div>
+                            <div class="col-4">
+                                <label>Moisture (%)</label>
+                                <input type="number" step="0.01" name="moisture" required placeholder="Moisture">
+                            </div>
+                            <div class="col-4">
+                                <label>Temp (°C)</label>
+                                <input type="number" step="0.01" name="temperature" required placeholder="Temp">
+                            </div>
+                            <div class="col-4 mt-3">
+                                <label class="text-muted" style="font-size: 0.8rem;">Nitrogen (Opt)</label>
+                                <input type="number" step="0.01" name="nitrogen" placeholder="N">
+                            </div>
+                            <div class="col-4 mt-3">
+                                <label class="text-muted" style="font-size: 0.8rem;">Phosphorus (Opt)</label>
+                                <input type="number" step="0.01" name="phosphorus" placeholder="P">
+                            </div>
+                            <div class="col-4 mt-3">
+                                <label class="text-muted" style="font-size: 0.8rem;">Potassium (Opt)</label>
+                                <input type="number" step="0.01" name="potassium" placeholder="K">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-custom"><i class="fas fa-save me-2"></i> Save Analysis</button>
+                    </form>
+                    <h6 class="text-muted fw-bold mb-3 text-uppercase"
+                        style="font-size: 0.8rem; letter-spacing: 0.05em;">Recent Analyses</h6>
+                    <ul class="list flex-grow-1">
+                        {% for analysis in analyses %}
+                        <li>
+                            <i class="fas fa-vial mt-1 text-success"></i>
+                            <div class="w-100">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="fw-bold text-dark">{{ analysis.created_at|date:"M d, Y" }}</div>
+                                    {% if analysis.health_score %}
+                                    <span class="badge" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; 
+                                        {% if analysis.health_score == 'Acid Nature' %}background-color: #fef08a; color: #854d0e;
+                                        {% elif analysis.health_score == 'Neutral' %}background-color: #bbf7d0; color: #166534;
+                                        {% else %}background-color: #bfdbfe; color: #1e40af;{% endif %}">
+                                        {{ analysis.health_score }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <div class="text-muted small mt-1">pH: {{ analysis.ph }} | Moisture: {{
+                                    analysis.moisture }}% | Temp: {{ analysis.temperature|default:"--" }}°C
+                                </div>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li class="text-muted fst-italic"><i class="fas fa-info-circle text-muted"></i> No soil records
+                            yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Expert Advice -->
+            <div class="col-lg-4 col-md-6 d-flex">
+                <div class="card w-100">
+                    <div class="card-header-custom">
+                        <h2><i class="fas fa-user-graduate"></i> Expert Advice</h2>
+                    </div>
+                    <p class="text-muted mb-4">Get professional agricultural guidance from verified experts to improve
+                        your yield and handle crop diseases.</p>
+                    <div class="d-grid gap-3 flex-grow-1 align-content-start">
+                        <a href="{% url 'farmer:browse_experts' %}" class="btn-custom text-center text-decoration-none">
+                            <i class="fas fa-search me-2"></i> Find Experts
+                        </a>
+                        <a href="{% url 'farmer:expert_advice' %}"
+                            class="btn-custom btn-secondary-custom text-center text-decoration-none">
+                            <i class="fas fa-lightbulb me-2"></i> My Personal Advice
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations & Weather -->
+            <div class="col-lg-4 col-md-12 d-flex">
+                <div class="card w-100">
+                    <div class="card-header-custom">
+                        <h2><i class="fas fa-chart-line"></i> Recommendations</h2>
+                    </div>
+                    <ul class="list mb-4 flex-grow-1">
+                        {% for rec in recommendations %}
+                        <li>
+                            <i class="fas fa-check-circle text-success mt-1"></i>
+                            <span>{{ rec }}</span>
+                        </li>
+                        {% empty %}
+                        <li class="text-muted"><i class="fas fa-info-circle text-muted"></i> Add soil data to see
+                            recommendations.</li>
+                        {% endfor %}
+                    </ul>
+
+                    <div class="card-header-custom mt-2">
+                        <h2><i class="fas fa-cloud-sun"></i> Weather Insights</h2>
+                    </div>
+                    <p class="text-muted"><i class="fas fa-tint me-2 text-info"></i> Check rainfall outlook and align
+                        planting cycles for the next 14 days.</p>
+                </div>
+            </div>
+
+            <!-- Products to Sell -->
+            <div class="col-lg-6 col-md-12 d-flex">
+                <div class="card w-100">
+                    <div class="card-header-custom">
+                        <h2><i class="fas fa-box-open"></i> Products for Marketplace</h2>
+                    </div>
+                    <form method="post" class="mb-4">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="add_product">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label>Product Name</label>
+                                <input type="text" name="name" required placeholder="e.g. Organic Tomatoes">
+                            </div>
+                            <div class="col-md-6">
+                                <label>Associated Supplier (Optional)</label>
+                                <select name="supplier_id"
+                                    style="width: 100%; padding: 10px 14px; margin-top: 6px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 0.95rem;">
+                                    <option value="">None / Self-supplied</option>
+                                    {% for supplier in suppliers %}
+                                    <option value="{{ supplier.id }}">{{ supplier.business_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Price (₹)</label>
+                                <input type="number" step="0.01" name="price" required placeholder="0.00">
+                            </div>
+                            <div class="col-md-6">
+                                <label>Qty (kg)</label>
+                                <input type="number" name="quantity" required placeholder="0">
+                            </div>
+                            <div class="col-12">
+                                <label>Description</label>
+                                <textarea name="description" rows="2" placeholder="Freshly harvested..."></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-custom"><i class="fas fa-plus me-2"></i> List Product</button>
+                    </form>
+
+                    <div class="table-responsive flex-grow-1">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Available Qty</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in products %}
+                                <tr>
+                                    <td class="fw-bold text-dark"><i
+                                            class="fas fa-leaf text-success me-2"></i>{{product.name }}</td>
+                                    <td><span class="badge-custom">₹{{ product.price }}</span></td>
+                                    <td>{{ product.quantity }} units</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted fst-italic py-4">No products listed on
+                                        marketplace yet.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory -->
+            <div class="col-lg-6 col-md-12 d-flex">
+                <div class="card w-100">
+                    <div class="card-header-custom">
+                        <h2><i class="fas fa-warehouse"></i> Farm Inventory</h2>
+                    </div>
+                    <form method="post" class="mb-4">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="add_inventory">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label>Item Name</label>
+                                <input type="text" name="name" required placeholder="e.g. Fertilizer, Seeds">
+                            </div>
+                            <div class="col-md-3">
+                                <label>Quantity</label>
+                                <input type="number" name="quantity" required placeholder="0">
+                            </div>
+                            <div class="col-md-3">
+                                <label>Unit</label>
+                                <input type="text" name="unit" placeholder="kg, bags, L">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-custom"><i class="fas fa-plus me-2"></i> Add to
+                            Inventory</button>
+                    </form>
+
+                    <div class="table-responsive flex-grow-1">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Item Name</th>
+                                    <th>Stock Level</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in inventory %}
+                                <tr>
+                                    <td class="fw-bold text-dark"><i
+                                            class="fas fa-layer-group text-primary me-2"></i>{{item.name }}</td>
+                                    <td><span class="fw-bold" style="font-size: 1.1rem;">{{ item.quantity }}</span>
+                                        <span class="text-muted">{{ item.unit }}</span>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted fst-italic py-4">Inventory is empty.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- Feed -->
+            <div class="col-lg-6 col-md-12 d-flex">
+                <div class="card w-100">
+                    <div class="card-header-custom">
+                        <h2><i class="fas fa-images"></i> Community Feed Updates</h2>
+                    </div>
+                    <form method="post" enctype="multipart/form-data" class="mb-4">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="post_feed">
+                        <div class="mb-3">
+                            <label>Share an update, photo, or status</label>
+                            <textarea name="description" rows="3" required
+                                placeholder="What's happening on the farm?"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label><i class="fas fa-camera me-1"></i> Attach Image (Optional)</label>
+                            <input type="file" name="image" accept="image/*" class="form-control" style="padding: 6px;">
+                        </div>
+                        <button type="submit" class="btn-custom"><i class="fas fa-paper-plane me-2"></i> Post
+                            Update</button>
+                    </form>
+
+                    <h6 class="text-muted fw-bold mb-3 text-uppercase"
+                        style="font-size: 0.8rem; letter-spacing: 0.05em;">Your Recent Posts</h6>
+                    <ul class="list flex-grow-1">
+                        {% for post in posts %}
+                        <li>
+                            <div
+                                style="min-width: 40px; height: 40px; background: #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #64748b;">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark" style="font-size: 0.9rem;">You <span
+                                        class="text-muted fw-normal ms-2">{{ post.created_at|date:"M d, Y" }}</span>
+                                </div>
+                                <div class="mt-1" style="font-size: 0.95rem;">{{ post.description }}</div>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li class="text-muted fst-italic"><i class="fas fa-info-circle text-muted"></i> You haven't
+                            posted anything yet.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Community Chat -->
+            <div class="col-12 d-flex mt-4" id="chat-card-wrapper">
+                <div class="card w-100" id="chat-card">
+                    <div class="card-header-custom d-flex justify-content-between align-items-center">
+                        <h2><i class="fas fa-comments"></i> Farmer Community Chat</h2>
+                        <button class="btn btn-sm btn-outline-secondary" id="fullscreen-toggle"
+                            title="Toggle Fullscreen">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chat-messages">
+                            {% for msg in chat_messages %}
+                            <div class="chat-message {% if msg.farmer == farmer %}own{% else %}other{% endif %}">
+                                {% if msg.farmer != farmer %}
+                                <div class="chat-meta">{{ msg.farmer.user.username }} said:</div>
+                                {% endif %}
+                                <div class="chat-bubble">
+                                    {% if msg.message %}{{ msg.message }}{% endif %}
+                                    {% if msg.document %}
+                                    <div class="mt-2 text-center">
+                                        <a href="{{ msg.document.url }}" target="_blank" class="btn btn-sm btn-light"
+                                            style="color: #059669; border: 1px solid #059669;">
+                                            <i class="fas fa-file-download me-1"></i> Open Attachment
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="chat-meta">{{ msg.created_at|date:"h:i A" }}</div>
+                            </div>
+                            {% empty %}
+                            <div class="text-center text-muted fst-italic py-4 w-100"><i
+                                    class="fas fa-comment-dots mb-2" style="font-size: 2rem;"></i><br>Start the
+                                conversation!</div>
+                            {% endfor %}
+                        </div>
+                        <form method="post" enctype="multipart/form-data" class="chat-input-area m-0">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_type" value="community_chat">
+
+                            <div class="chat-file-upload" title="Attach Document or Image">
+                                <i class="fas fa-paperclip"></i>
+                                <div class="chat-file-indicator" id="file-indicator"></div>
+                                <input type="file" name="document" id="chat-document-input">
+                            </div>
+
+                            <input type="text" name="message" placeholder="Type a message to the community..."
+                                autocomplete="off">
+                            <button type="submit" class="btn-custom"
+                                style="width: auto; margin-top: 0; padding: 10px 20px;"><i
+                                    class="fas fa-paper-plane"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div> <!-- end row -->
+    </div> <!-- end container -->
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Auto-scroll chat to bottom
+            const chatMessages = document.getElementById("chat-messages");
+            if (chatMessages) {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Show indicator when file is selected
+            const fileInput = document.getElementById("chat-document-input");
+            const fileIndicator = document.getElementById("file-indicator");
+            if (fileInput && fileIndicator) {
+                fileInput.addEventListener("change", function () {
+                    if (this.files && this.files.length > 0) {
+                        fileIndicator.style.display = "block";
+                    } else {
+                        fileIndicator.style.display = "none";
+                    }
+                });
+            }
+
+            // Fullscreen Toggle Logic
+            const fullscreenBtn = document.getElementById("fullscreen-toggle");
+            const chatCard = document.getElementById("chat-card");
+            if (fullscreenBtn && chatCard) {
+                fullscreenBtn.addEventListener("click", function () {
+                    chatCard.classList.toggle("chat-fullscreen-card");
+                    const icon = this.querySelector("i");
+                    if (chatCard.classList.contains("chat-fullscreen-card")) {
+                        icon.classList.remove("fa-expand");
+                        icon.classList.add("fa-compress");
+                        document.body.style.overflow = "hidden"; // Prevent background scrolling
+                    } else {
+                        icon.classList.remove("fa-compress");
+                        icon.classList.add("fa-expand");
+                        document.body.style.overflow = "auto";
+                    }
+                    if (chatMessages) {
+                        chatMessages.scrollTop = chatMessages.scrollHeight; // readjust scroll
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
