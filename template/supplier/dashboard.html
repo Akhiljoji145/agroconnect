@@ -1,4 +1,5 @@
 {% load expert_tags %}
+{% load supplier_tags %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,10 +13,9 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
-            background-size: cover;
-            min-height: 100vh;
+            background: #f0fdf4;
             margin: 0;
+            color: #0f172a;
         }
 
         .navbar {
@@ -25,112 +25,209 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .navbar-brand {
+        .navbar-brand,
+        .nav-link {
             font-weight: 700;
             color: #fff !important;
         }
 
-        .navbar-nav .nav-link {
-            color: rgba(255, 255, 255, 0.9) !important;
+        .nav-link {
             font-weight: 500;
-            transition: color 0.3s ease;
+            opacity: 0.9;
         }
 
-        .navbar-nav .nav-link:hover {
-            color: #fff !important;
+        .nav-link:hover {
+            opacity: 1;
         }
 
-        .container-fluid {
-            padding: 30px;
+        /* Hero Section for User */
+        .dashboard-hero {
+            background: linear-gradient(rgba(5, 150, 105, 0.7), rgba(4, 120, 87, 0.8)), url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center;
+            background-size: cover;
+            padding: 60px 0;
+            color: white;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            margin-bottom: 10px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container-main {
+            max-width: 1400px;
+            padding: 0 20px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 16px;
+            padding: 24px;
+            border: none;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+            height: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header-custom {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .card-header-custom h2 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #064e3b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-header-custom i {
+            color: #059669;
+            font-size: 1.4rem;
         }
 
         .stats-card {
             background: #fff;
-            border-radius: 15px;
-            padding: 25px;
-            border: none;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .stats-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
         }
 
         .stats-number {
             font-size: 2.5rem;
-            font-weight: 700;
+            font-weight: 800;
             color: #059669;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            line-height: 1;
         }
 
         .stats-label {
-            color: #6c757d;
-            font-weight: 500;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
             margin-top: 8px;
         }
 
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            margin-bottom: 25px;
-        }
-
-        .card-header {
+        .btn-custom {
+            padding: 10px 18px;
             background: #059669;
-            color: white;
-            border-radius: 15px 15px 0 0 !important;
-            font-weight: 600;
-        }
-
-        .btn-action {
-            background: #059669;
+            color: #fff;
             border: none;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .btn-action:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .supplier-info {
-            background: rgba(102, 126, 234, 0.1);
             border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-custom:hover {
+            background: #047857;
+            transform: translateY(-1px);
+            color: #fff;
+        }
+
+        .btn-outline-custom {
+            background: transparent;
+            color: #059669;
+            border: 2px solid #059669;
+        }
+
+        .btn-outline-custom:hover {
+            background: #059669;
+            color: #fff;
         }
 
         .verification-badge {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            font-weight: 700;
             font-size: 0.85rem;
-            font-weight: 600;
         }
 
         .verification-pending {
-            background: #fff3cd;
-            color: #856404;
+            background: #fef3c7;
+            color: #92400e;
         }
 
         .verification-verified {
-            background: #d1f2eb;
-            color: #0f5132;
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 10px;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        td {
+            padding: 14px 10px;
+            font-size: 0.95rem;
+            color: #334155;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .badge-status {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.75rem;
         }
     </style>
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container-fluid">
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid px-4">
             <a class="navbar-brand" href="{% url 'supplier:dashboard' %}">
                 <i class="fas fa-store"></i> AgroConnect
             </a>
@@ -145,47 +242,22 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'supplier:profile' %}">
-                            <i class="fas fa-user"></i> My Profile
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="{% url 'supplier:products' %}">
-                            <i class="fas fa-box"></i> Products
+                            <i class="fas fa-box"></i> My Products
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'supplier:orders' %}">
-                            <i class="fas fa-shopping-cart"></i> Outgoing Orders
+                        <a class="nav-link" href="{% url 'supplier:farmer_marketplace' %}">
+                            <i class="fas fa-gavel"></i> Farmer Auctions
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'supplier:incoming_purchase_orders' %}">
-                            <i class="fas fa-inbox"></i> Incoming Offers
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'supplier:service_areas' %}">
-                            <i class="fas fa-map-marked-alt"></i> Service Areas
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'supplier:reviews' %}">
-                            <i class="fas fa-star"></i> Reviews
+                        <a class="nav-link" href="{% url 'supplier:my_bids' %}">
+                            <i class="fas fa-receipt"></i> My Bids
                         </a>
                     </li>
                 </ul>
                 <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'supplier:marketplace' %}">
-                            <i class="fas fa-store"></i> Marketplace
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">
-                            <i class="fas fa-home"></i> Home
-                        </a>
-                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/logout/">
                             <i class="fas fa-sign-out-alt"></i> Logout
@@ -196,166 +268,246 @@
         </div>
     </nav>
 
-    <div class="container-fluid">
-        {% if messages %}
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <div class="dashboard-hero">
+        <div class="container text-center">
+            <h1 class="hero-title">Welcome back, {{ supplier.business_name }}!</h1>
+            <p class="hero-subtitle">Manage your supply chain, orders, and business growth</p>
+            <div class="mt-3">
+                <span class="verification-badge verification-{{ supplier.is_verified|yesno:'verified,pending' }}">
+                    {% if supplier.is_verified %}
+                    <i class="fas fa-check-circle"></i> Verified Supplier
+                    {% else %}
+                    <i class="fas fa-clock"></i> Verification Pending
+                    {% endif %}
+                </span>
+            </div>
         </div>
-        {% endfor %}
+    </div>
+
+    <div class="container-main mb-5">
+        {% if messages %}
+        <div class="row mb-4">
+            <div class="col-12">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert"
+                    style="border-radius: 12px; font-weight: 500;">
+                    <i class="fas fa-info-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
         {% endif %}
 
-        <!-- Supplier Info -->
-        <div class="supplier-info">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h2 class="mb-1">Welcome back, {{ supplier.business_name }}!</h2>
-                    <p class="mb-1"><strong>{{ supplier.get_business_type_display }}</strong></p>
-                    <p class="mb-0">{{ supplier.description|truncatewords:20 }}</p>
-                </div>
-                <div class="col-md-4 text-end">
-                    <span class="verification-badge verification-{{ supplier.is_verified|yesno:'verified,pending' }}">
-                        {% if supplier.is_verified %}
-                        <i class="fas fa-check-circle"></i> Verified Supplier
-                        {% else %}
-                        <i class="fas fa-clock"></i> Verification Pending
-                        {% endif %}
-                    </span>
-                </div>
-            </div>
-        </div>
-
         <!-- Statistics -->
-        <div class="row mb-4">
-            <div class="col-md-3 mb-3">
-                <div class="stats-card text-center">
+        <div class="row g-4 mb-5">
+            <div class="col-md-3">
+                <div class="stats-card">
                     <div class="stats-number">{{ total_products }}</div>
-                    <div class="stats-label">Total Products</div>
+                    <div class="stats-label">Live Products</div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="stats-card text-center">
+            <div class="col-md-3">
+                <div class="stats-card">
                     <div class="stats-number">{{ total_orders }}</div>
-                    <div class="stats-label">Total Outgoing Orders</div>
+                    <div class="stats-label">Total Shipments</div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="stats-card text-center">
+            <div class="col-md-3">
+                <div class="stats-card">
                     <div class="stats-number">{{ pending_orders }}</div>
-                    <div class="stats-label">Pending Outgoing Orders</div>
+                    <div class="stats-label">Processing</div>
                 </div>
             </div>
-            <div class="col-md-3 mb-3">
-                <div class="stats-card text-center cursor-pointer"
-                    onclick="window.location.href='{% url \'supplier:incoming_purchase_orders\' %}'"
-                    style="cursor: pointer;">
-                    <div class="stats-number {% if incoming_orders_count > 0 %}text-warning{% endif %}">{{
-                        incoming_orders_count }}</div>
-                    <div class="stats-label">Incoming Farmer Offers</div>
+            <div class="col-md-3">
+                <div class="stats-card" style="cursor: pointer;"
+                    onclick="window.location.href='{% url 'supplier:incoming_purchase_orders' %}'">
+                    <div class="stats-number {% if incoming_orders_count > 0 %}text-warning{% endif %}">
+                        {{ incoming_orders_count }}
+                    </div>
+                    <div class="stats-label">Farmer Offers <i class="fas fa-external-link-alt ms-1"
+                            style="font-size: 0.6rem;"></i></div>
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <!-- Recent Orders -->
-            <div class="col-lg-6 mb-4">
-                <div class="card">
-                    <div class="card-header">
-                        <i class="fas fa-shopping-cart"></i> Recent Outgoing Orders
+        <!-- Farmer Auction Marketplace Quick Access -->
+        <div class="row g-4 mb-4">
+            <div class="col-12">
+                <div class="card"
+                    style="background: linear-gradient(135deg, #ecfdf5, #d1fae5); border: 2px solid #6ee7b7;">
+                    <div class="card-header-custom">
+                        <h2><i class="fas fa-gavel"></i> Farmer Auction Marketplace</h2>
                     </div>
-                    <div class="card-body">
-                        {% if recent_orders %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Order ID</th>
-                                        <th>Farmer</th>
-                                        <th>Amount</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for order in recent_orders %}
-                                    <tr>
-                                        <td>{{ order.order_id }}</td>
-                                        <td>{{ order.farmer.user.username }}</td>
-                                        <td>₹{{ order.total_amount }}</td>
-                                        <td>
-                                            <span class="badge bg-{{ order.status|default:'secondary' }}">
-                                                {{ order.get_status_display }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <a href="{% url 'supplier:order_detail' order.id %}"
-                                                class="btn btn-sm btn-action">View</a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                    <p class="text-muted mb-3">Browse fresh produce listed by farmers — place competitive bids and win
+                        the best deals. Sorted by highest bid so you always know where you stand.</p>
+                    <div class="d-flex gap-3 flex-wrap">
+                        <a href="{% url 'supplier:farmer_marketplace' %}"
+                            class="btn-custom text-decoration-none d-inline-flex align-items-center gap-2"
+                            style="padding: 12px 24px; border-radius: 12px; font-weight: 700;">
+                            <i class="fas fa-gavel"></i> Browse &amp; Bid on Listings
+                        </a>
+                        <a href="{% url 'supplier:my_bids' %}"
+                            class="btn-custom btn-outline-custom text-decoration-none d-inline-flex align-items-center gap-2"
+                            style="padding: 12px 24px; border-radius: 12px; font-weight: 700; background: #fff; color: #059669; border: 2px solid #059669;">
+                            <i class="fas fa-receipt"></i> My Submitted Bids
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Consumer Orders -->
+        <div class="row g-4 mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header-custom">
+                        <h2><i class="fas fa-shopping-bag"></i> Orders from Consumers</h2>
+                    </div>
+                    <div class="table-responsive">
+                        {% if consumer_orders %}
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Product</th>
+                                    <th>Quantity</th>
+                                    <th>Total</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in consumer_orders %}
+                                <tr>
+                                    <td class="fw-bold">#{{ order.id }}</td>
+                                    <td>
+                                        <div class="fw-bold">{{ order.supplier_product.name }}</div>
+                                        <div class="small text-muted">by {{ order.consumer.user.username }}</div>
+                                    </td>
+                                    <td>{{ order.quantity }}</td>
+                                    <td>₹{{ order.total_price }}</td>
+                                    <td>
+                                        <span class="badge-custom"
+                                            style="{% if order.status == 'pending' %}background:#fef3c7;color:#92400e;{% elif order.status == 'accepted' %}background:#dcfce7;color:#166534;{% endif %}">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if order.status == 'pending' %}
+                                        <form action="{% url 'supplier:accept_market_order' order.id %}" method="post"
+                                            style="display:inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-custom">
+                                                <i class="fas fa-check me-1"></i> Accept Order
+                                            </button>
+                                        </form>
+                                        {% else %}
+                                        <button class="btn btn-sm btn-light" disabled>No Action</button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                         {% else %}
-                        <p class="text-muted text-center py-3">
-                            <i class="fas fa-inbox"></i> No orders yet
-                        </p>
+                        <div class="text-center py-4 text-muted">
+                            <i class="fas fa-shopping-bag fa-2x mb-2"></i>
+                            <p>No consumer orders yet</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card">
+                    <div class="card-header-custom">
+                        <h2><i class="fas fa-truck-loading"></i> Recent Shipments</h2>
+                    </div>
+                    <div class="table-responsive">
+                        {% if recent_orders %}
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Farmer</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in recent_orders %}
+                                <tr>
+                                    <td class="fw-bold">#{{ order.order_id }}</td>
+                                    <td>{{ order.farmer.user.username }}</td>
+                                    <td>₹{{ order.total_amount }}</td>
+                                    <td>
+                                        <span class="badge-status bg-light text-dark">
+                                            {{ order.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'supplier:order_detail' order.id %}"
+                                            class="btn btn-sm btn-custom">View</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <div class="text-center py-4 text-muted">
+                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                            <p>No orders yet</p>
+                        </div>
                         {% endif %}
                     </div>
                 </div>
             </div>
 
             <!-- Latest Products -->
-            <div class="col-lg-6 mb-4">
+            <div class="col-lg-5">
                 <div class="card">
-                    <div class="card-header">
-                        <i class="fas fa-box"></i> Latest Products
+                    <div class="card-header-custom d-flex justify-content-between align-items-center">
+                        <h2><i class="fas fa-box"></i> Latest Products</h2>
+                        <a href="{% url 'supplier:add_product' %}" class="btn btn-sm btn-custom">
+                            <i class="fas fa-plus"></i> Add New
+                        </a>
                     </div>
-                    <div class="card-body">
+                    <div class="table-responsive">
                         {% if products %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>Category</th>
-                                        <th>Price</th>
-                                        <th>Stock</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for product in products %}
-                                    <tr>
-                                        <td>{{ product.name|truncatechars:30 }}</td>
-                                        <td>
-                                            <span class="badge bg-secondary">
-                                                {{ product.get_category_display }}
-                                            </span>
-                                        </td>
-                                        <td>₹{{ product.price }}</td>
-                                        <td>{{ product.stock_quantity }}</td>
-                                        <td>
-                                            <a href="{% url 'supplier:edit_product' product.id %}"
-                                                class="btn btn-sm btn-outline-primary">Edit</a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Stock</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in products %}
+                                <tr>
+                                    <td class="fw-bold">{{ product.name|truncatechars:20 }}</td>
+                                    <td class="text-success fw-bold">₹{{ product.price }}</td>
+                                    <td>{{ product.stock_quantity }}</td>
+                                    <td>
+                                        <a href="{% url 'supplier:edit_product' product.id %}"
+                                            class="btn btn-sm btn-outline-custom"><i class="fas fa-edit"></i></a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                         {% else %}
-                        <p class="text-muted text-center py-3">
-                            <i class="fas fa-inbox"></i> No products added yet
-                        </p>
-                        {% endif %}
-
-                        <div class="text-center mt-3">
-                            <a href="{% url 'supplier:add_product' %}" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Add New Product
-                            </a>
+                        <div class="text-center py-4 text-muted">
+                            <i class="fas fa-box-open fa-2x mb-2"></i>
+                            <p>No products added yet</p>
                         </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

@@ -98,49 +98,131 @@ def expert_dashboard(request):
 
 
 @login_required
-def consultation_detail(request, consultation_id):
-    consultation = get_object_or_404(ConsultationSession, id=consultation_id)
+def expert_consultations(request):
+    user = request.user
     try:
-        expert = request.user.expert_profile
+        expert = user.expert_profile
     except AttributeError:
         messages.error(request, "Please login as an expert.")
         return redirect("farmer:login")
     
-    if consultation.expert != expert:
+    # Get filters
+    status = request.GET.get('status', 'all')
+    search = request.GET.get('search', '')
+    
+    # Base queryset
+    consultations = ConsultationSession.objects.filter(expert=expert)
+    
+    # Apply filters
+    if status != 'all':
+        consultations = consultations.filter(status=status)
+    
+    if search:
+        from django.db.models import Q
+        consultations = consultations.filter(
+            Q(title__icontains=search) | 
+            Q(farmer__user__username__icontains=search) |
+            Q(description__icontains=search)
+        )
+    
+    # Order by creation date
+    consultations = consultations.order_by('-created_at')
+    
+    # Pagination
+    paginator = Paginator(consultations, 12)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        "expert": expert,
+        "consultations": page_obj,
+        "status_choices": ConsultationSession.STATUS_CHOICES,
+        "current_status": status,
+        "current_search": search,
+    }
+    
+    return render(request, "expert/consultations.html", context)
+
+
+@login_required
+def consultation_detail(request, consultation_id):
+    consultation = get_object_or_404(ConsultationSession, id=consultation_id)
+    user = request.user
+    
+    is_expert = hasattr(user, 'expert_profile') and consultation.expert == user.expert_profile
+    is_farmer = hasattr(user, 'farmer_profile') and consultation.farmer == user.farmer_profile
+    
+    if not (is_expert or is_farmer):
         messages.error(request, "You don't have permission to view this consultation.")
-        return redirect("expert:dashboard")
-    
-    # Get messages
-    messages_list = ConsultationMessage.objects.filter(
-        consultation=consultation
-    ).order_by('created_at')
-    
-    # Get related soil analysis if any
-    soil_analysis = None
-    if consultation.description.lower() in ['soil', 'soil analysis', 'soil health']:
-        soil_analysis = SoilAnalysis.objects.filter(
-            farmer=consultation.farmer
-        ).order_by('-created_at').first()
-    
+        if hasattr(user, 'expert_profile'):
+            return redirect("expert:dashboard")
+        return redirect("farmer:dashboard")
+
     if request.method == "POST":
         message_text = request.POST.get("message", "").strip()
         if message_text:
             ConsultationMessage.objects.create(
                 consultation=consultation,
-                sender=request.user,
+                sender=user,
                 message=message_text,
-                is_expert=True
+                is_expert=is_expert
             )
-            messages.success(request, "Message sent successfully.")
+            messages.success(request, "Message sent!")
             return redirect("expert:consultation_detail", consultation_id=consultation.id)
+
+    # Get messages
+    messages_list = consultation.messages.all().order_by('created_at')
     
+    # Get soil analysis
+    soil_analysis = SoilAnalysis.objects.filter(farmer=consultation.farmer).order_by('-created_at').first() if not is_farmer else None
+
     context = {
         "consultation": consultation,
-        "messages": messages_list,
+        "messages_list": messages_list,
+        "is_expert": is_expert,
         "soil_analysis": soil_analysis,
     }
     
     return render(request, "expert/consultation_detail.html", context)
+
+
+@login_required
+def consultation_session(request, session_id):
+    """View for the live video and chat consultation session."""
+    consultation = get_object_or_404(ConsultationSession, id=session_id)
+    user = request.user
+    
+    is_expert = hasattr(user, 'expert_profile') and consultation.expert == user.expert_profile
+    is_farmer = hasattr(user, 'farmer_profile') and consultation.farmer == user.farmer_profile
+    
+    if not (is_expert or is_farmer):
+        messages.error(request, "You don't have permission to join this session.")
+        return redirect("expert:dashboard")
+
+    if request.method == "POST":
+        message_text = request.POST.get("message", "").strip()
+        if message_text:
+            ConsultationMessage.objects.create(
+                consultation=consultation,
+                sender=user,
+                message=message_text,
+                is_expert=is_expert
+            )
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                from django.http import JsonResponse
+                return JsonResponse({"status": "success"})
+            return redirect("expert:consultation_session", session_id=session_id)
+
+    messages_list = consultation.messages.all().order_by('created_at')
+    
+    context = {
+        "consultation": consultation,
+        "messages_list": messages_list,
+        "is_expert": is_expert,
+        "other_user": consultation.farmer.user if is_expert else consultation.expert.user,
+    }
+    
+    return render(request, "expert/session.html", context)
 
 
 @login_required

@@ -1,3 +1,4 @@
+{% load expert_tags %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -227,6 +228,21 @@
             border: 1px solid #d1fae5;
         }
 
+        .badge-health-acid {
+            background-color: #fef08a !important;
+            color: #854d0e !important;
+        }
+
+        .badge-health-neutral {
+            background-color: #bbf7d0 !important;
+            color: #166534 !important;
+        }
+
+        .badge-health-other {
+            background-color: #bfdbfe !important;
+            color: #1e40af !important;
+        }
+
         /* Chat styles */
         .chat-container {
             display: flex;
@@ -360,6 +376,30 @@
         .chat-fullscreen-card .chat-container {
             height: calc(100vh - 150px);
         }
+
+        .chat-attachment-img {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 12px;
+            margin-top: 10px;
+            object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: block;
+        }
+
+        .chat-attachment-img:hover {
+            transform: scale(1.02);
+        }
+
+        .chat-attachment-container {
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 14px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
     </style>
 </head>
 
@@ -376,6 +416,8 @@
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item"><a class="nav-link" href="{% url 'farmer:dashboard' %}"><i
                                 class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'farmer:marketplace_listings' %}"><i
+                                class="fas fa-gavel"></i> Bid Marketplace</a></li>
                 </ul>
                 <ul class="navbar-nav">
                     <li class="nav-item"><a class="nav-link" href="/"><i class="fas fa-globe"></i> Main Site</a></li>
@@ -456,16 +498,15 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="fw-bold text-dark">{{ analysis.created_at|date:"M d, Y" }}</div>
                                     {% if analysis.health_score %}
-                                    <span class="badge" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 4px; 
-                                        {% if analysis.health_score == 'Acid Nature' %}background-color: #fef08a; color: #854d0e;
-                                        {% elif analysis.health_score == 'Neutral' %}background-color: #bbf7d0; color: #166534;
-                                        {% else %}background-color: #bfdbfe; color: #1e40af;{% endif %}">
+                                    <span
+                                        class="badge {% if analysis.health_score == 'Acid Nature' %}badge-health-acid{% elif analysis.health_score == 'Neutral' %}badge-health-neutral{% else %}badge-health-other{% endif %}"
+                                        style="font-size: 0.7rem; padding: 4px 8px; border-radius: 4px;">
                                         {{ analysis.health_score }}
                                     </span>
                                     {% endif %}
                                 </div>
-                                <div class="text-muted small mt-1">pH: {{ analysis.ph }} | Moisture: {{
-                                    analysis.moisture }}% | Temp: {{ analysis.temperature|default:"--" }}°C
+                                <div class="text-muted small mt-1">pH: {{ analysis.ph }} | Moisture:
+                                    {{analysis.moisture}} % | Temp: {{ analysis.temperature|default:"--" }}°C
                                 </div>
                             </div>
                         </li>
@@ -486,7 +527,7 @@
                     <p class="text-muted mb-4">Get professional agricultural guidance from verified experts to improve
                         your yield and handle crop diseases.</p>
                     <div class="d-grid gap-3 flex-grow-1 align-content-start">
-                        <a href="{% url 'farmer:browse_experts' %}" class="btn-custom text-center text-decoration-none">
+                        <a href="{% url 'expert:browse_experts' %}" class="btn-custom text-center text-decoration-none">
                             <i class="fas fa-search me-2"></i> Find Experts
                         </a>
                         <a href="{% url 'farmer:expert_advice' %}"
@@ -494,6 +535,47 @@
                             <i class="fas fa-lightbulb me-2"></i> My Personal Advice
                         </a>
                     </div>
+                    {% if consultations %}
+                    <div class="mt-4">
+                        <h6 class="text-muted fw-bold mb-3 text-uppercase"
+                            style="font-size: 0.8rem; letter-spacing: 0.05em;">My Consultations</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Expert</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for consultation in consultations %}
+                                    <tr>
+                                        <td class="small fw-bold">{{ consultation.expert.user.username }}</td>
+                                        <td>
+                                            <span
+                                                class="badge-status {% if consultation.status == 'requested' %}bg-warning text-dark{% elif consultation.status == 'scheduled' or consultation.status == 'in_progress' %}bg-info text-dark{% elif consultation.status == 'completed' %}bg-success text-white{% else %}bg-secondary text-white{% endif %}"
+                                                style="font-size: 0.65rem;">
+                                                {{ consultation.get_status_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{% url 'expert:consultation_detail' consultation.id %}"
+                                                class="btn btn-sm btn-outline-success py-1 px-2 m-0"
+                                                style="font-size: 0.7rem; width: auto;">View</a>
+                                            {% if consultation.status|can_join %}
+                                            <a href="{% url 'expert:consultation_session' consultation.id %}"
+                                                class="btn btn-sm btn-success py-1 px-2 m-0"
+                                                style="font-size: 0.7rem; width: auto;">Join</a>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -527,7 +609,19 @@
             <div class="col-lg-6 col-md-12 d-flex">
                 <div class="card w-100">
                     <div class="card-header-custom">
-                        <h2><i class="fas fa-box-open"></i> Products for Marketplace</h2>
+                        <div class="d-flex justify-content-between align-items-center w-100">
+                            <h2><i class="fas fa-box-open"></i> Products for Marketplace</h2>
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'farmer:marketplace_listings' %}" class="btn btn-sm btn-success"
+                                    style="border-radius: 8px; font-weight: 700;">
+                                    <i class="fas fa-gavel me-1"></i> Bid Marketplace
+                                </a>
+                                <a href="{% url 'supplier:marketplace' %}" class="btn btn-sm btn-outline-success"
+                                    style="border-radius: 8px;">
+                                    <i class="fas fa-search me-1"></i> Browse
+                                </a>
+                            </div>
+                        </div>
                     </div>
                     <form method="post" class="mb-4">
                         {% csrf_token %}
@@ -568,6 +662,7 @@
                             <thead>
                                 <tr>
                                     <th>Product</th>
+                                    <th>Supplier</th>
                                     <th>Price</th>
                                     <th>Available Qty</th>
                                 </tr>
@@ -575,14 +670,22 @@
                             <tbody>
                                 {% for product in products %}
                                 <tr>
-                                    <td class="fw-bold text-dark"><i
-                                            class="fas fa-leaf text-success me-2"></i>{{product.name }}</td>
+                                    <td class="fw-bold text-dark"><i class="fas fa-leaf text-success me-2"></i>
+                                        {{product.name }}</td>
+                                    <td>
+                                        {% if product.supplier %}
+                                        <span class="text-primary"><i class="fas fa-store me-1"></i>
+                                            {{product.supplier.business_name }}</span>
+                                        {% else %}
+                                        <span class="text-muted fst-italic">Self-supplied</span>
+                                        {% endif %}
+                                    </td>
                                     <td><span class="badge-custom">₹{{ product.price }}</span></td>
                                     <td>{{ product.quantity }} units</td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="3" class="text-center text-muted fst-italic py-4">No products listed on
+                                    <td colspan="4" class="text-center text-muted fst-italic py-4">No products listed on
                                         marketplace yet.</td>
                                 </tr>
                                 {% endfor %}
@@ -716,11 +819,15 @@
                                 <div class="chat-bubble">
                                     {% if msg.message %}{{ msg.message }}{% endif %}
                                     {% if msg.document %}
-                                    <div class="mt-2 text-center">
-                                        <a href="{{ msg.document.url }}" target="_blank" class="btn btn-sm btn-light"
-                                            style="color: #059669; border: 1px solid #059669;">
-                                            <i class="fas fa-file-download me-1"></i> Open Attachment
-                                        </a>
+                                    <div class="chat-attachment-container" data-url="{{ msg.document.url }}">
+                                        <div class="attachment-preview"></div>
+                                        <div class="mt-2 text-center">
+                                            <a href="{{ msg.document.url }}" target="_blank"
+                                                class="btn btn-sm btn-light attachment-link"
+                                                style="color: #059669; border: 1px solid #059669; border-radius: 8px; font-weight: 500;">
+                                                <i class="fas fa-file-download me-1"></i> Open Attachment
+                                            </a>
+                                        </div>
                                     </div>
                                     {% endif %}
                                 </div>
@@ -798,6 +905,35 @@
                     }
                 });
             }
+
+            // Handle attachment previews - detect images by URL extension
+            const IMAGE_EXTS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
+            document.querySelectorAll('.chat-attachment-container').forEach(function (container) {
+                const url = container.dataset.url;
+                if (!url) return;
+                const lower = url.toLowerCase().split('?')[0];
+                const isImage = IMAGE_EXTS.some(ext => lower.endsWith(ext));
+                const preview = container.querySelector('.attachment-preview');
+                const link = container.querySelector('.attachment-link');
+                if (isImage && preview) {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.target = '_blank';
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.alt = 'Attachment';
+                    img.className = 'chat-attachment-img';
+                    a.appendChild(img);
+                    preview.appendChild(a);
+                }
+                if (link) {
+                    const icon = document.createElement('i');
+                    icon.className = 'fas fa-file-download me-1';
+                    link.innerHTML = '';
+                    link.appendChild(icon);
+                    link.appendChild(document.createTextNode(isImage ? ' View Full Image' : ' Open Attachment'));
+                }
+            });
         });
     </script>
 </body>

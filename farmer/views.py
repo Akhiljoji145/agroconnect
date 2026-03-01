@@ -1,15 +1,15 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm
+from accounts.forms import CustomUserCreationForm
 from django.shortcuts import redirect, render, get_object_or_404
 from django.core.paginator import Paginator
 from django.db.models import Q, Avg, Count
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from consumer.models import ConsumerProfile
-from expert.models import ExpertProfile, ExpertAdvice
-from expert.models import ExpertProfile, ExpertAdvice
+from expert.models import ExpertProfile, ExpertAdvice, ConsultationSession
 from supplier.models import SupplierProfile
 from .models import FarmerProfile, FarmerPost, InventoryItem, MarketOrder, Product, SoilAnalysis, FarmerChatMessage
 
@@ -52,16 +52,18 @@ def logout_view(request):
 
 def farmer_register(request):
     if request.method == "POST":
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         farm_name = request.POST.get("farm_name", "").strip()
         location = request.POST.get("location", "").strip()
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)
+            user.role = 'farmer'
+            user.save()
             FarmerProfile.objects.create(user=user, farm_name=farm_name, location=location)
             login(request, user)
             return redirect("farmer:dashboard")
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
     return render(request, "farmer/register.html", {"form": form})
 
 
@@ -151,6 +153,7 @@ def farmer_dashboard(request):
     products = Product.objects.filter(farmer=farmer).order_by("-created_at")
     inventory = InventoryItem.objects.filter(farmer=farmer).order_by("-updated_at")
     chat_messages = FarmerChatMessage.objects.order_by("created_at")
+    consultations = ConsultationSession.objects.filter(farmer=farmer).order_by("-created_at")
 
     context = {
         "farmer": farmer,
@@ -159,7 +162,8 @@ def farmer_dashboard(request):
         "products": products,
         "inventory": inventory,
         "chat_messages": chat_messages,
-        "suppliers": SupplierProfile.objects.filter(is_active=True),
+        "consultations": consultations,
+        "suppliers": SupplierProfile.objects.filter(is_active=True, is_verified=True),
         "recommendations": [
             "Maize and sorghum are suitable for current soil nutrients.",
             "Consider drip irrigation for moisture optimization.",
@@ -367,3 +371,127 @@ def sell_to_supplier(request, supplier_id):
     return render(request, "farmer/sell_to_supplier.html", context)
 
 
+@login_required
+def farmer_marketplace_listings(request):
+    """Farmer views their own listings and sees bids sorted highest to lowest."""
+    try:
+        farmer = request.user.farmer_profile
+    except AttributeError:
+        messages.error(request, "Please login as a farmer.")
+        return redirect("farmer:login")
+
+    from .models import MarketplaceListing
+    listings = (
+        MarketplaceListing.objects
+        .filter(farmer=farmer)
+        .prefetch_related('bids__supplier')
+        .order_by('-created_at')
+    )
+
+    # Attach sorted bids to each listing
+    for listing in listings:
+        listing.sorted_bids = listing.bids.order_by('-bid_amount')
+
+    context = {
+        "farmer": farmer,
+        "listings": listings,
+    }
+    return render(request, "farmer/marketplace_listings.html", context)
+
+
+@login_required
+def create_marketplace_listing(request):
+    """Farmer creates a new product listing for open bidding."""
+    try:
+        farmer = request.user.farmer_profile
+    except AttributeError:
+        messages.error(request, "Please login as a farmer.")
+        return redirect("farmer:login")
+
+    from .models import MarketplaceListing
+    available_products = Product.objects.filter(farmer=farmer, quantity__gt=0)
+
+    if request.method == "POST":
+        product_id = request.POST.get("product_id")
+        min_price = request.POST.get("min_price")
+        quantity = request.POST.get("quantity")
+        unit = request.POST.get("unit", "kg").strip() or "kg"
+        description = request.POST.get("description", "").strip()
+        deadline = request.POST.get("deadline")
+
+        if product_id and min_price and quantity and deadline:
+            try:
+                product = get_object_or_404(Product, id=product_id, farmer=farmer)
+                qty = int(quantity)
+                if qty <= 0 or qty > product.quantity:
+                    messages.error(request, f"Quantity must be between 1 and {product.quantity}.")
+                else:
+                    from django.utils.dateparse import parse_datetime
+                    deadline_dt = parse_datetime(deadline)
+                    if not deadline_dt:
+                        messages.error(request, "Invalid deadline date/time.")
+                    else:
+                        from django.utils import timezone as tz
+                        from django.conf import settings
+                        import pytz
+                        if deadline_dt.tzinfo is None:
+                            deadline_dt = pytz.timezone(settings.TIME_ZONE).localize(deadline_dt)
+                        MarketplaceListing.objects.create(
+                            farmer=farmer,
+                            product=product,
+                            min_price=float(min_price),
+                            quantity=qty,
+                            unit=unit,
+                            description=description,
+                            deadline=deadline_dt,
+                        )
+                        messages.success(request, f"'{product.name}' listed for bidding successfully!")
+                        return redirect("farmer:marketplace_listings")
+            except (ValueError, Exception) as e:
+                messages.error(request, f"Error: {e}")
+        else:
+            messages.error(request, "Please fill in all required fields.")
+
+    context = {
+        "farmer": farmer,
+        "available_products": available_products,
+    }
+    return render(request, "farmer/create_listing.html", context)
+
+
+@login_required
+def accept_bid(request, bid_id):
+    """Farmer accepts a specific bid — rejects all others for that listing."""
+    try:
+        farmer = request.user.farmer_profile
+    except AttributeError:
+        messages.error(request, "Please login as a farmer.")
+        return redirect("farmer:login")
+
+    if request.method != "POST":
+        return redirect("farmer:marketplace_listings")
+
+    from supplier.models import SupplierBid
+    bid = get_object_or_404(SupplierBid, id=bid_id, listing__farmer=farmer)
+    listing = bid.listing
+
+    if not listing.is_open:
+        messages.error(request, "This listing is no longer open for bids.")
+        return redirect("farmer:marketplace_listings")
+
+    # Accept this bid
+    bid.status = SupplierBid.STATUS_ACCEPTED
+    bid.save()
+
+    # Reject all other bids
+    listing.bids.exclude(id=bid.id).update(status=SupplierBid.STATUS_REJECTED)
+
+    # Mark listing as sold
+    listing.status = listing.STATUS_SOLD
+    listing.save()
+
+    messages.success(
+        request,
+        f"Bid from {bid.supplier.business_name} (₹{bid.bid_amount}/unit) accepted! They will now proceed to payment."
+    )
+    return redirect("farmer:marketplace_listings")

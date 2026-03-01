@@ -100,48 +100,18 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'supplier:dashboard' %}">
-                            <i class="fas fa-tachometer-alt"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'supplier:profile' %}">
-                            <i class="fas fa-user"></i> My Profile
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'supplier:products' %}">
-                            <i class="fas fa-box"></i> Products
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'supplier:orders' %}">
-                            <i class="fas fa-shopping-cart"></i> Orders
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{% url 'supplier:service_areas' %}">
-                            <i class="fas fa-map-marked-alt"></i> Service Areas
-                        </a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'supplier:dashboard' %}"><i
+                                class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'supplier:products' %}"><i
+                                class="fas fa-box"></i> My Products</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'supplier:farmer_marketplace' %}"><i
+                                class="fas fa-gavel"></i> Farmer Auctions</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'supplier:my_bids' %}"><i
+                                class="fas fa-receipt"></i> My Bids</a></li>
                 </ul>
                 <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'supplier:marketplace' %}">
-                            <i class="fas fa-store"></i> Marketplace
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">
-                            <i class="fas fa-home"></i> Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/logout/">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="/logout/"><i class="fas fa-sign-out-alt"></i>
+                            Logout</a></li>
                 </ul>
             </div>
         </div>

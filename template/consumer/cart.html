@@ -234,9 +234,9 @@
                     <tbody>
                         {% for item in cart.items.all %}
                         <tr>
-                            <td class="fw-bold"><i class="fas fa-leaf text-success me-2"></i>{{ item.product.name }}
+                            <td class="fw-bold"><i class="fas fa-box text-success me-2"></i>{{ item.item_name }}
                             </td>
-                            <td>₹{{ item.product.price }}</td>
+                            <td>{{ item.item_price }}</td>
                             <td>{{ item.quantity }}</td>
                             <td class="fw-bold text-success">₹{{ item.total_price }}</td>
                         </tr>

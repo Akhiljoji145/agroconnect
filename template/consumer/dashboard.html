@@ -256,53 +256,55 @@
 
         <div class="row g-4 d-flex align-items-stretch">
 
-            <!-- Browse Marketplace -->
+            <!-- Supplier Marketplace -->
             <div class="col-lg-7 col-md-12 d-flex">
                 <div class="card w-100">
                     <div class="card-header-custom">
-                        <h2><i class="fas fa-store"></i> Browse Marketplace</h2>
+                        <h2><i class="fas fa-store"></i> Supplier Marketplace</h2>
                     </div>
-
                     <div class="table-responsive flex-grow-1">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Product</th>
+                                    <th>Supplier</th>
                                     <th>Price</th>
-                                    <th>Available Qty</th>
-                                    <th>Action</th>
+                                    <th>Stock</th>
+                                    <th>Add to Cart</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for product in products %}
+                                {% for sp in supplier_products %}
                                 <tr>
                                     <td>
-                                        <div class="fw-bold text-dark"><i
-                                                class="fas fa-leaf text-success me-2"></i>{{product.name }}</div>
-                                        {% if product.supplier %}
-                                        <div class="small text-muted mt-1"><i
-                                                class="fas fa-store text-muted me-1"></i>Supplied by: {{
-                                            product.supplier.business_name }}</div>
-                                        {% endif %}
+                                        <div class="fw-bold text-dark"><i class="fas fa-box text-success me-2"></i>{{ sp.name }}</div>
+                                        <div class="small text-muted mt-1">
+                                            {% if sp.is_organic %}<span style="background:#d1fae5;color:#065f46;padding:1px 7px;border-radius:99px;font-size:0.72rem;font-weight:600;">Organic</span>{% endif %}
+                                            {% if sp.is_featured %}<span style="background:#fef3c7;color:#92400e;padding:1px 7px;border-radius:99px;font-size:0.72rem;font-weight:600;">Featured</span>{% endif %}
+                                        </div>
                                     </td>
-                                    <td><span class="badge-custom">₹{{ product.price }}</span></td>
-                                    <td>{{ product.quantity }} units</td>
                                     <td>
-                                        <form action="{% url 'consumer:add_to_cart' product.id %}" method="post"
-                                            style="display: flex; gap: 8px; align-items: center; justify-content: flex-end;">
+                                        <div class="small fw-semibold">{{ sp.supplier.business_name }}</div>
+                                        <div class="small text-muted">{{ sp.supplier.location }}</div>
+                                    </td>
+                                    <td><span class="badge-custom">&#8377;{{ sp.price }}/{{ sp.unit }}</span></td>
+                                    <td>{{ sp.stock_quantity }} {{ sp.unit }}</td>
+                                    <td>
+                                        <form action="{% url 'consumer:add_supplier_to_cart' sp.id %}" method="post"
+                                            style="display:flex; gap:8px; align-items:center;">
                                             {% csrf_token %}
-                                            <input type="number" name="quantity" min="1" max="{{ product.quantity }}"
-                                                value="1" style="width: 70px; margin-top: 0; padding: 6px 10px;">
+                                            <input type="number" name="quantity" min="1" max="{{ sp.stock_quantity }}"
+                                                value="1" style="width:65px; margin-top:0; padding:6px 8px;">
                                             <button type="submit" class="btn-custom"
-                                                style="margin-top: 0; padding: 8px 12px; width: auto;"><i
-                                                    class="fas fa-cart-plus"></i></button>
+                                                style="margin-top:0; padding:8px 12px; width:auto;">
+                                                <i class="fas fa-cart-plus"></i>
+                                            </button>
                                         </form>
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted fst-italic py-4">No products listed on
-                                        marketplace yet. Check back soon.</td>
+                                    <td colspan="5" class="text-center text-muted fst-italic py-4">No supplier products available yet.</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -330,8 +332,18 @@
                                 {% for order in orders %}
                                 <tr>
                                     <td>
-                                        <div class="fw-bold text-dark">{% if order.product %}
-                                            {{order.product.name}}{%else %}Order #{{ order.id }}{% endif %}</div>
+                                        <div class="fw-bold text-dark">
+                                            {% if order.product %}
+                                            {{ order.product.name }}
+                                            {% elif order.supplier_product %}
+                                            {{ order.supplier_product.name }}
+                                            {% else %}
+                                            Order #{{ order.id }}
+                                            {% endif %}
+                                        </div>
+                                        {% if order.supplier %}
+                                        <div class="small text-muted"><i class="fas fa-store me-1"></i>{{ order.supplier.business_name }}</div>
+                                        {% endif %}
                                         <div class="small text-muted">ID: #{{ order.id }}</div>
                                     </td>
                                     <td>{{ order.quantity }}</td>

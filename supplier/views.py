@@ -12,6 +12,7 @@ from .models import (
     SupplierReview, SupplierAvailability, SupplierServiceArea,
     SupplierPurchaseOrder
 )
+from farmer.models import FarmerProfile, MarketOrder
 from .forms import (
     CustomUserCreationForm, SupplierRegistrationForm, SupplierProductForm,
     SupplierProfileUpdateForm, SupplyOrderForm, SupplierServiceAreaForm
@@ -90,6 +91,7 @@ def supplier_dashboard(request):
         "pending_count": pending_orders,
         "incoming_orders_count": incoming_orders_count,
         "recent_incoming_orders": recent_incoming_orders,
+        "consumer_orders": MarketOrder.objects.filter(supplier=supplier).order_by("-created_at"),
     }
     
     return render(request, "supplier/dashboard.html", context)
@@ -169,27 +171,36 @@ def product_list(request):
 
 @login_required
 def add_product(request):
+    from .models import SupplierBid
     try:
         supplier = request.user.supplier_profile
     except AttributeError:
         messages.error(request, "Please login as a supplier.")
         return redirect("farmer:login")
-    
+
+    # Farmer products this supplier owns (accepted bid + payment done)
+    farmer_purchases = (
+        SupplierBid.objects
+        .filter(supplier=supplier, status=SupplierBid.STATUS_ACCEPTED, payment_status=SupplierBid.PAYMENT_PAID)
+        .select_related('listing__product', 'listing__farmer')
+    )
+
     if request.method == "POST":
         form = SupplierProductForm(request.POST, request.FILES)
         if form.is_valid():
             product = form.save(commit=False)
             product.supplier = supplier
             product.save()
-            messages.success(request, "Product added successfully!")
+            messages.success(request, "Product added successfully and listed for consumers!")
             return redirect("supplier:products")
     else:
         form = SupplierProductForm()
-    
+
     return render(request, "supplier/add_product.html", {
         "form": form,
         "category_choices": SupplierProduct.PRODUCT_CATEGORY,
         "availability_choices": SupplierProduct.AVAILABILITY_STATUS,
+        "farmer_purchases": farmer_purchases,
     })
 
 
@@ -533,3 +544,151 @@ def respond_purchase_order(request, order_id):
             messages.error(request, "Invalid action.")
             
     return redirect("supplier:incoming_purchase_orders")
+
+
+@login_required
+def supplier_farmer_marketplace(request):
+    """Supplier browses open farmer marketplace listings and places bids."""
+    from farmer.models import MarketplaceListing
+    from .models import SupplierBid
+    from django.utils import timezone
+
+    try:
+        supplier = request.user.supplier_profile
+    except AttributeError:
+        messages.error(request, "Please login as a supplier.")
+        return redirect("farmer:login")
+
+    # Show all open listings (deadline not passed and status=open)
+    listings = (
+        MarketplaceListing.objects
+        .filter(status=MarketplaceListing.STATUS_OPEN, deadline__gt=timezone.now())
+        .select_related('farmer__user', 'product')
+        .prefetch_related('bids__supplier')
+        .order_by('-created_at')
+    )
+
+    # Attach sorted bids and whether this supplier has already bid
+    supplier_bid_ids = set(
+        SupplierBid.objects.filter(supplier=supplier).values_list('listing_id', flat=True)
+    )
+    for listing in listings:
+        listing.sorted_bids = listing.bids.order_by('-bid_amount')
+        listing.supplier_already_bid = listing.id in supplier_bid_ids
+
+    context = {
+        "supplier": supplier,
+        "listings": listings,
+    }
+    return render(request, "supplier/farmer_marketplace.html", context)
+
+
+@login_required
+def place_bid(request, listing_id):
+    """Supplier places a bid on a farmer listing."""
+    from farmer.models import MarketplaceListing
+    from .models import SupplierBid
+    from django.utils import timezone
+
+    try:
+        supplier = request.user.supplier_profile
+    except AttributeError:
+        messages.error(request, "Please login as a supplier.")
+        return redirect("farmer:login")
+
+    if request.method != "POST":
+        return redirect("supplier:farmer_marketplace")
+
+    listing = get_object_or_404(MarketplaceListing, id=listing_id)
+
+    if not listing.is_open:
+        messages.error(request, "This listing is no longer accepting bids.")
+        return redirect("supplier:farmer_marketplace")
+
+    # Check if already bid
+    if SupplierBid.objects.filter(listing=listing, supplier=supplier).exists():
+        messages.error(request, "You have already placed a bid on this listing.")
+        return redirect("supplier:farmer_marketplace")
+
+    bid_amount = request.POST.get("bid_amount")
+    message = request.POST.get("message", "").strip()
+
+    if not bid_amount:
+        messages.error(request, "Please enter a bid amount.")
+        return redirect("supplier:farmer_marketplace")
+
+    try:
+        bid_val = float(bid_amount)
+        if bid_val < float(listing.min_price):
+            messages.error(request, f"Your bid must be at least ₹{listing.min_price}/unit.")
+            return redirect("supplier:farmer_marketplace")
+
+        SupplierBid.objects.create(
+            listing=listing,
+            supplier=supplier,
+            bid_amount=bid_val,
+            message=message,
+        )
+        messages.success(
+            request,
+            f"Bid of ₹{bid_val}/unit placed on '{listing.product.name}' successfully!"
+        )
+    except ValueError:
+        messages.error(request, "Invalid bid amount.")
+
+    return redirect("supplier:farmer_marketplace")
+
+
+@login_required
+def supplier_my_bids(request):
+    """Supplier sees all their bids and can pay for accepted bids."""
+    from .models import SupplierBid
+    try:
+        supplier = request.user.supplier_profile
+    except AttributeError:
+        messages.error(request, "Please login as a supplier.")
+        return redirect("farmer:login")
+
+    if request.method == "POST":
+        bid_id = request.POST.get("bid_id")
+        if bid_id:
+            bid = get_object_or_404(SupplierBid, id=bid_id, supplier=supplier, status=SupplierBid.STATUS_ACCEPTED)
+            if bid.payment_status == SupplierBid.PAYMENT_UNPAID:
+                bid.payment_status = SupplierBid.PAYMENT_PAID
+                bid.save()
+                messages.success(request, f"Payment for '{bid.listing.product.name}' confirmed!")
+            else:
+                messages.info(request, "This bid has already been paid.")
+        return redirect("supplier:my_bids")
+
+    bids = (
+        SupplierBid.objects
+        .filter(supplier=supplier)
+        .select_related('listing__farmer__user', 'listing__product')
+        .order_by('-created_at')
+    )
+
+    context = {
+        "supplier": supplier,
+        "bids": bids,
+    }
+    return render(request, "supplier/my_bids.html", context)
+
+@login_required
+def accept_market_order(request, order_id):
+    try:
+        supplier = request.user.supplier_profile
+    except AttributeError:
+        messages.error(request, "Please login as a supplier.")
+        return redirect("farmer:login")
+    
+    order = get_object_or_404(MarketOrder, id=order_id, supplier=supplier)
+    
+    if order.status == MarketOrder.STATUS_PENDING:
+        order.status = MarketOrder.STATUS_ACCEPTED
+        order.save()
+        messages.success(request, f"Order #{order.id} accepted successfully!")
+    else:
+        messages.warning(request, f"Order #{order.id} is already in {order.status} status.")
+        
+    return redirect("supplier:dashboard")

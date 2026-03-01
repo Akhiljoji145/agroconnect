@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 from farmer.models import FarmerProfile, SoilAnalysis
 
@@ -23,7 +23,7 @@ class ExpertProfile(models.Model):
         ('rejected', 'Rejected'),
     ]
     
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="expert_profile")
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="expert_profile")
     specialization = models.CharField(max_length=30, choices=SPECIALIZATION_CHOICES)
     qualifications = models.TextField(help_text="Educational qualifications and certifications")
     experience_years = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(50)])
@@ -192,7 +192,7 @@ class ExpertReview(models.Model):
 
 class ConsultationMessage(models.Model):
     consultation = models.ForeignKey(ConsultationSession, on_delete=models.CASCADE, related_name="messages")
-    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     message = models.TextField()
     is_expert = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

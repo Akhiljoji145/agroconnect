@@ -1,24 +1,27 @@
 from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
+from accounts.forms import CustomUserCreationForm
 from django.shortcuts import redirect, render, get_object_or_404
 
 from farmer.models import MarketOrder, Product
+from supplier.models import SupplierProduct
 from .models import ConsumerProfile, Cart, CartItem
 
 
 def consumer_register(request):
 	if request.method == "POST":
-		form = UserCreationForm(request.POST)
+		form = CustomUserCreationForm(request.POST)
 		address = request.POST.get("address", "").strip()
 		if form.is_valid():
-			user = form.save()
+			user = form.save(commit=False)
+			user.role = 'consumer'
+			user.save()
 			ConsumerProfile.objects.create(user=user, address=address)
 			login(request, user)
 			return redirect("consumer:dashboard")
 	else:
-		form = UserCreationForm()
+		form = CustomUserCreationForm()
 	return render(request, "consumer/register.html", {"form": form})
 
 
@@ -31,8 +34,10 @@ def consumer_dashboard(request):
 
 	consumer = user.consumer_profile
 
-	products = Product.objects.order_by("-created_at")[:20]
-	orders = MarketOrder.objects.filter(consumer=consumer).order_by("-created_at")
+	supplier_products = SupplierProduct.objects.filter(
+		availability_status='in_stock', stock_quantity__gt=0
+	).select_related('supplier').order_by("-created_at")[:40]
+	orders = MarketOrder.objects.filter(consumer=consumer, supplier__isnull=False).order_by("-created_at")
 
 	cart, _ = Cart.objects.get_or_create(consumer=consumer)
 	cart_item_count = cart.items.count()
@@ -42,7 +47,7 @@ def consumer_dashboard(request):
 		"consumer/dashboard.html",
 		{
 			"consumer": consumer,
-			"products": products,
+			"supplier_products": supplier_products,
 			"orders": orders,
 			"cart_item_count": cart_item_count
 		},
@@ -65,7 +70,7 @@ def add_to_cart(request, product_id):
 			return redirect("consumer:dashboard")
 
 		cart, _ = Cart.objects.get_or_create(consumer=consumer)
-		cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+		cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product, supplier_product=None)
 
 		if not created:
 			if cart_item.quantity + quantity > product.quantity:
@@ -78,6 +83,39 @@ def add_to_cart(request, product_id):
 			cart_item.save()
 
 		messages.success(request, f"Added {product.name} to cart.")
+	return redirect("consumer:dashboard")
+
+
+@login_required
+def add_supplier_to_cart(request, product_id):
+	if request.method == "POST":
+		user = request.user
+		if not hasattr(user, "consumer_profile"):
+			return redirect("farmer:login")
+
+		consumer = user.consumer_profile
+		sp = get_object_or_404(SupplierProduct, id=product_id, availability_status='in_stock')
+		quantity = int(request.POST.get("quantity", 1))
+
+		if sp.stock_quantity < quantity:
+			messages.error(request, f"Only {sp.stock_quantity} {sp.unit} available.")
+			return redirect("consumer:dashboard")
+
+		cart, _ = Cart.objects.get_or_create(consumer=consumer)
+		cart_item, created = CartItem.objects.get_or_create(cart=cart, supplier_product=sp, product=None)
+
+		if not created:
+			new_qty = cart_item.quantity + quantity
+			if new_qty > sp.stock_quantity:
+				messages.error(request, f"Cannot add. You already have {cart_item.quantity} in cart.")
+				return redirect("consumer:dashboard")
+			cart_item.quantity = new_qty
+			cart_item.save()
+		else:
+			cart_item.quantity = quantity
+			cart_item.save()
+
+		messages.success(request, f"Added {sp.name} to cart.")
 	return redirect("consumer:dashboard")
 
 
@@ -122,21 +160,38 @@ def process_payment(request):
 
 		# Pre-flight stock check
 		for item in cart.items.all():
-			if item.product.quantity < item.quantity:
-				messages.error(request, f"Sorry, {item.product.name} only has {item.product.quantity} items left. Please update your cart.")
-				return redirect("consumer:view_cart")
+			if item.product:
+				if item.product.quantity < item.quantity:
+					messages.error(request, f"Sorry, {item.product.name} only has {item.product.quantity} items left. Please update your cart.")
+					return redirect("consumer:view_cart")
+			elif item.supplier_product:
+				if item.supplier_product.stock_quantity < item.quantity:
+					messages.error(request, f"Sorry, {item.supplier_product.name} only has {item.supplier_product.stock_quantity} {item.supplier_product.unit} left. Please update your cart.")
+					return redirect("consumer:view_cart")
 
 		for item in cart.items.all():
-			MarketOrder.objects.create(
-				farmer=item.product.farmer,
-				consumer=consumer,
-				product=item.product,
-				quantity=item.quantity,
-				status=MarketOrder.STATUS_PENDING
-			)
-			# Deduct quantity from original product model so farmer sees it go down
-			item.product.quantity -= item.quantity
-			item.product.save(update_fields=['quantity'])
+			if item.product:
+				MarketOrder.objects.create(
+					farmer=item.product.farmer,
+					consumer=consumer,
+					product=item.product,
+					quantity=item.quantity,
+					status=MarketOrder.STATUS_PENDING
+				)
+				# Deduct quantity from original product model so farmer sees it go down
+				item.product.quantity -= item.quantity
+				item.product.save(update_fields=['quantity'])
+			elif item.supplier_product:
+				MarketOrder.objects.create(
+					supplier=item.supplier_product.supplier,
+					consumer=consumer,
+					supplier_product=item.supplier_product,
+					quantity=item.quantity,
+					status=MarketOrder.STATUS_PENDING
+				)
+				# Deduct quantity from supplier product
+				item.supplier_product.stock_quantity -= item.quantity
+				item.supplier_product.save(update_fields=['stock_quantity'])
 
 		cart.items.all().delete()
 		messages.success(request, "Payment successful! Your orders have been placed.")

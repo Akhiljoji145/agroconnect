@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Marketplace - Bid on Produce | AgroConnect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0fdf4;
+            color: #0f172a;
+            margin: 0;
+        }
+
+        .navbar {
+            background: rgba(5, 150, 105, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .1);
+        }
+
+        .navbar-brand,
+        .nav-link {
+            color: #fff !important;
+            font-weight: 600;
+        }
+
+        .nav-link:hover {
+            opacity: .85;
+        }
+
+        .page-hero {
+            background: linear-gradient(135deg, #064e3b 0%, #059669 60%, #10b981 100%);
+            padding: 60px 0 44px;
+            color: #fff;
+            text-align: center;
+        }
+
+        .page-hero h1 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .page-hero p {
+            opacity: .85;
+            font-size: 1.05rem;
+        }
+
+        .stats-strip {
+            background: rgba(255, 255, 255, .15);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, .2);
+            margin-top: 24px;
+            padding: 14px 0;
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            color: #fff;
+            font-size: .88rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .container-main {
+            max-width: 1100px;
+            margin: 36px auto;
+            padding: 0 20px;
+        }
+
+        .listing-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, .07);
+            margin-bottom: 32px;
+            overflow: hidden;
+            transition: transform .2s, box-shadow .2s;
+        }
+
+        .listing-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, .12);
+        }
+
+        .listing-header {
+            background: linear-gradient(90deg, #ecfdf5, #d1fae5);
+            padding: 22px 28px 16px;
+        }
+
+        .product-name {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #064e3b;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .listing-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-size: .8rem;
+            font-weight: 600;
+        }
+
+        .pill-green {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .pill-amber {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .pill-blue {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .pill-purple {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        .listing-body {
+            padding: 22px 28px;
+        }
+
+        .farmer-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .farmer-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #059669, #10b981);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .farmer-name {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: .95rem;
+        }
+
+        .farmer-loc {
+            font-size: .8rem;
+            color: #64748b;
+        }
+
+        .bid-leaderboard {
+            margin-bottom: 20px;
+        }
+
+        .leaderboard-title {
+            font-size: .8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+
+        .bid-entry {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            font-size: .88rem;
+        }
+
+        .bid-entry.top {
+            background: linear-gradient(90deg, #ecfdf5, #d1fae5);
+            border: 1.5px solid #6ee7b7;
+        }
+
+        .bid-entry.other {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .bid-rank-badge {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: .75rem;
+            flex-shrink: 0;
+        }
+
+        .rank-gold {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #fff;
+        }
+
+        .rank-silver {
+            background: #d1d5db;
+            color: #374151;
+        }
+
+        .bid-supplier-name {
+            font-weight: 600;
+            flex: 1;
+            color: #1e293b;
+        }
+
+        .bid-price {
+            font-weight: 800;
+            color: #059669;
+            font-size: 1rem;
+        }
+
+        .no-bids-yet {
+            text-align: center;
+            padding: 18px;
+            color: #94a3b8;
+            font-size: .88rem;
+            background: #f8fafc;
+            border-radius: 10px;
+            margin-bottom: 16px;
+        }
+
+        .bid-form-section {
+            background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
+            border: 2px solid #a7f3d0;
+            border-radius: 14px;
+            padding: 20px;
+        }
+
+        .bid-form-title {
+            font-weight: 700;
+            color: #064e3b;
+            font-size: .95rem;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bid-input-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .bid-input-wrap {
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .bid-input-wrap label {
+            font-size: .82rem;
+            font-weight: 600;
+            color: #065f46;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .bid-input {
+            padding: 10px 14px;
+            border: 1.5px solid #6ee7b7;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #065f46;
+            background: #fff;
+            width: 100%;
+            transition: all .2s;
+        }
+
+        .bid-input:focus {
+            outline: none;
+            border-color: #059669;
+            box-shadow: 0 0 0 3px rgba(5, 150, 105, .12);
+        }
+
+        .bid-message-input {
+            padding: 9px 13px;
+            border: 1.5px solid #d1fae5;
+            border-radius: 10px;
+            font-size: .88rem;
+            color: #1e293b;
+            background: #fff;
+            width: 100%;
+            transition: all .2s;
+            margin-top: 10px;
+        }
+
+        .bid-message-input:focus {
+            outline: none;
+            border-color: #059669;
+        }
+
+        .btn-bid {
+            background: linear-gradient(135deg, #059669, #047857);
+            color: #fff;
+            border: none;
+            padding: 11px 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: .92rem;
+            cursor: pointer;
+            transition: all .2s;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .btn-bid:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(5, 150, 105, .3);
+        }
+
+        .already-bid-badge {
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: .88rem;
+            text-align: center;
+        }
+
+        .description-text {
+            color: #64748b;
+            font-size: .88rem;
+            font-style: italic;
+            margin-bottom: 16px;
+        }
+
+        .min-price-hint {
+            font-size: .78rem;
+            color: #059669;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .alert {
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #a7f3d0;
+            margin-bottom: 20px;
+        }
+
+        .timer-display {
+            font-family: monospace;
+            font-weight: 700;
+            color: #b45309;
+        }
+
+        .countdown-pill {
+            background: #fef3c7;
+            color: #92400e;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: .8rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand" href="/supplier/dashboard/"><i class="fas fa-store"></i> AgroConnect</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/supplier/dashboard/"><i class="fas fa-home"></i>
+                            Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{% url 'supplier:farmer_marketplace' %}"><i
+                                class="fas fa-gavel"></i> Farmer Auctions</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'supplier:my_bids' %}"><i
+                                class="fas fa-receipt"></i> My Bids</a></li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link" href="/logout/"><i class="fas fa-sign-out-alt"></i>
+                            Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-hero">
+        <h1><i class="fas fa-gavel me-2"></i>Farmer Auction Marketplace</h1>
+        <p>Bid on fresh produce directly from farmers — best price wins</p>
+        <div class="stats-strip">
+            <div class="stat-item"><i class="fas fa-list-ol"></i> {{ listings|length }} Open Auctions</div>
+            <div class="stat-item"><i class="fas fa-handshake"></i> Transparent Bidding</div>
+            <div class="stat-item"><i class="fas fa-shield-alt"></i> Secure Payments</div>
+        </div>
+    </div>
+
+    <div class="container-main">
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+            <div
+                class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'warning' %}alert-warning{% else %}alert-success{% endif %} alert-dismissible fade show">
+                <i
+                    class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% else %}fa-check-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if listings %}
+        {% for listing in listings %}
+        <div class="listing-card">
+            <div class="listing-header">
+                <div class="product-name">
+                    <i class="fas fa-leaf" style="color:#059669;"></i>
+                    {{ listing.product.name }}
+                    <span class="countdown-pill" data-deadline="{{ listing.deadline.isoformat }}">
+                        <i class="fas fa-clock"></i>
+                        <span class="timer-display" id="timer-{{ listing.id }}">...</span>
+                    </span>
+                </div>
+                <div class="listing-pills">
+                    <span class="pill pill-green"><i class="fas fa-boxes"></i> {{ listing.quantity }}
+                        {{ listing.unit}}</span>
+                    <span class="pill pill-amber"><i class="fas fa-tags"></i>
+                        Min ₹{{ listing.min_price }}/{{listing.unit }}</span>
+                    <span class="pill pill-blue"><i class="fas fa-calendar-alt"></i>
+                        Ends {{ listing.deadline|date:"M d,Y h:i A" }}</span>
+                    <span class="pill pill-purple"><i class="fas fa-calculator"></i>
+                        Total ≥ ₹{% widthratio listing.min_price 1 listing.quantity %}</span>
+                </div>
+            </div>
+
+            <div class="listing-body">
+                <div class="farmer-info">
+                    <div class="farmer-avatar">{{ listing.farmer.user.username|first|upper }}</div>
+                    <div>
+                        <div class="farmer-name">{{ listing.farmer.farm_name|default:listing.farmer.user.username }}
+                        </div>
+                        <div class="farmer-loc"><i class="fas fa-map-marker-alt me-1"></i>
+                            {{listing.farmer.location|default:"Location not specified" }}
+                        </div>
+                    </div>
+                </div>
+
+                {% if listing.description %}
+                <p class="description-text"><i class="fas fa-quote-left me-1"></i>{{ listing.description }}</p>
+                {% endif %}
+
+                <!-- Bid Leaderboard -->
+                <div class="bid-leaderboard">
+                    <div class="leaderboard-title"><i class="fas fa-trophy me-1" style="color:#f59e0b;"></i>Current Bids
+                        — Highest to Lowest</div>
+                    {% if listing.sorted_bids %}
+                    {% for bid in listing.sorted_bids %}
+                    <div class="bid-entry {% if forloop.first %}top{% else %}other{% endif %}">
+                        <div class="bid-rank-badge {% if forloop.first %}rank-gold{% else %}rank-silver{% endif %}">
+                            {% if forloop.first %}<i class="fas fa-crown"></i>{% else %}{{ forloop.counter }}{% endif %}
+                        </div>
+                        <div class="bid-supplier-name">{{ bid.supplier.business_name }}</div>
+                        <div class="bid-price">₹{{ bid.bid_amount }}/{{ listing.unit }}</div>
+                        <div class="text-muted" style="font-size:.78rem;">{{ bid.created_at|timesince }} ago</div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="no-bids-yet"><i class="fas fa-comment-dots me-2"></i>No bids yet — be the first!</div>
+                    {% endif %}
+                </div>
+
+                <!-- Bid Form -->
+                {% if listing.supplier_already_bid %}
+                <div class="already-bid-badge">
+                    <i class="fas fa-check-circle me-2" style="color:#059669;"></i>
+                    You have already placed a bid on this listing. <a href="{% url 'supplier:my_bids' %}"
+                        style="color:#1d4ed8;">View your bids →</a>
+                </div>
+                {% else %}
+                <div class="bid-form-section">
+                    <div class="bid-form-title"><i class="fas fa-gavel"></i> Place Your Bid</div>
+                    <form method="post" action="{% url 'supplier:place_bid' listing.id %}">
+                        {% csrf_token %}
+                        <div class="bid-input-row">
+                            <div class="bid-input-wrap">
+                                <label>Your Bid (₹ per {{ listing.unit }})</label>
+                                <input type="number" name="bid_amount" class="bid-input" step="0.01"
+                                    min="{{ listing.min_price }}" placeholder="{{ listing.min_price }}" required
+                                    id="bid-input-{{ listing.id }}"
+                                    oninput="updateTotal('{{ listing.id }}', {{ listing.quantity }}, this.value)">
+                                <div class="min-price-hint">Minimum: ₹{{ listing.min_price }}/{{ listing.unit }}</div>
+                            </div>
+                            <div class="bid-input-wrap" style="max-width: 200px;">
+                                <label>Estimated Total</label>
+                                <div style="padding: 11px 14px; background: #fff; border: 1.5px solid #d1fae5; border-radius: 10px; font-weight: 700; color: #059669;"
+                                    id="total-{{ listing.id }}">₹—</div>
+                            </div>
+                            <button type="submit" class="btn-bid"><i class="fas fa-gavel me-1"></i> Submit Bid</button>
+                        </div>
+                        <input type="text" name="message" class="bid-message-input"
+                            placeholder="Optional message to farmer (e.g. I can arrange transport, interested in bulk...)">
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-store-slash"></i>
+            <h3 style="color:#064e3b; font-weight:700;">No Open Auctions</h3>
+            <p class="text-muted">Farmers haven't listed any products for auction yet.<br>Check back soon!</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function updateTotal(listingId, qty, amount) {
+            const totalEl = document.getElementById('total-' + listingId);
+            const val = parseFloat(amount);
+            if (!isNaN(val) && val > 0) {
+                totalEl.textContent = '₹' + (val * qty).toFixed(2);
+                totalEl.style.color = '#059669';
+            } else {
+                totalEl.textContent = '₹—';
+            }
+        }
+
+        // Countdown timers
+        function startCountdowns() {
+            document.querySelectorAll('[data-deadline]').forEach(el => {
+                const listingId = el.querySelector('.timer-display').id.replace('timer-', '');
+                const deadline = new Date(el.dataset.deadline);
+                const timerEl = document.getElementById('timer-' + listingId);
+
+                function tick() {
+                    const now = new Date();
+                    const diff = deadline - now;
+                    if (diff <= 0) {
+                        timerEl.textContent = 'Ended';
+                        timerEl.style.color = '#dc2626';
+                        return;
+                    }
+                    const d = Math.floor(diff / 86400000);
+                    const h = Math.floor((diff % 86400000) / 3600000);
+                    const m = Math.floor((diff % 3600000) / 60000);
+                    const s = Math.floor((diff % 60000) / 1000);
+                    if (d > 0) timerEl.textContent = d + 'd ' + h + 'h';
+                    else timerEl.textContent = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+                }
+                tick();
+                setInterval(tick, 1000);
+            });
+        }
+        startCountdowns();
+    </script>
+</body>
+
+</html>

@@ -19,4 +19,10 @@ urlpatterns = [
     path("marketplace/", views.marketplace, name="marketplace"),
     path("supplier/incoming-orders/", views.incoming_purchase_orders, name="incoming_purchase_orders"),
     path("supplier/incoming-orders/<int:order_id>/respond/", views.respond_purchase_order, name="respond_purchase_order"),
+    # Farmer Marketplace Bidding
+    path("supplier/farmer-market/", views.supplier_farmer_marketplace, name="farmer_marketplace"),
+    path("supplier/farmer-market/<int:listing_id>/bid/", views.place_bid, name="place_bid"),
+    path("supplier/my-bids/", views.supplier_my_bids, name="my_bids"),
+    path("supplier/market-orders/<int:order_id>/accept/", views.accept_market_order, name="accept_market_order"),
 ]
+

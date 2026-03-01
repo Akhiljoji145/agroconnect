@@ -14,5 +14,10 @@ urlpatterns = [
 	path("expert-advice/", views.expert_advice_list, name="expert_advice"),
 	path("expert-advice/<int:advice_id>/", views.expert_advice_detail, name="expert_advice_detail"),
 	path("sell-to-supplier/<int:supplier_id>/", views.sell_to_supplier, name="sell_to_supplier"),
+	# Marketplace Bidding
+	path("farmer/marketplace/", views.farmer_marketplace_listings, name="marketplace_listings"),
+	path("farmer/marketplace/create/", views.create_marketplace_listing, name="create_marketplace_listing"),
+	path("farmer/marketplace/bid/<int:bid_id>/accept/", views.accept_bid, name="accept_bid"),
 ]
+
 

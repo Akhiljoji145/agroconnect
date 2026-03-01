@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 
@@ -23,7 +23,7 @@ class SupplierProfile(models.Model):
         ('none', 'Not Certified'),
     ]
     
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="supplier_profile")
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="supplier_profile")
     business_name = models.CharField(max_length=200)
     business_type = models.CharField(max_length=30, choices=BUSINESS_TYPE)
     description = models.TextField(help_text="Describe your business and specialties")
@@ -224,3 +224,38 @@ class SupplierServiceArea(models.Model):
 
     def __str__(self):
         return f"{self.supplier.business_name} - {self.district}"
+
+
+class SupplierBid(models.Model):
+    STATUS_PENDING = 'pending'
+    STATUS_ACCEPTED = 'accepted'
+    STATUS_REJECTED = 'rejected'
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_ACCEPTED, 'Accepted'),
+        (STATUS_REJECTED, 'Rejected'),
+    ]
+
+    PAYMENT_UNPAID = 'unpaid'
+    PAYMENT_PAID = 'paid'
+
+    PAYMENT_CHOICES = [
+        (PAYMENT_UNPAID, 'Unpaid'),
+        (PAYMENT_PAID, 'Paid'),
+    ]
+
+    listing = models.ForeignKey('farmer.MarketplaceListing', on_delete=models.CASCADE, related_name='bids')
+    supplier = models.ForeignKey(SupplierProfile, on_delete=models.CASCADE, related_name='bids_placed')
+    bid_amount = models.DecimalField(max_digits=10, decimal_places=2, help_text='Offered price per unit (₹)')
+    message = models.TextField(blank=True, help_text='Optional message to the farmer')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    payment_status = models.CharField(max_length=10, choices=PAYMENT_CHOICES, default=PAYMENT_UNPAID)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['listing', 'supplier']
+        ordering = ['-bid_amount']
+
+    def __str__(self):
+        return f"Bid by {self.supplier.business_name} on {self.listing} — ₹{self.bid_amount}/unit"

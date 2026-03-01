@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from .models import ExpertProfile, ExpertAdvice
 
 class CustomUserCreationForm(forms.Form):
@@ -17,6 +17,7 @@ class CustomUserCreationForm(forms.Form):
     
     def clean_username(self):
         username = self.cleaned_data.get('username')
+        User = get_user_model()
         if User.objects.filter(username=username).exists():
             raise forms.ValidationError("A user with that username already exists.")
         return username
@@ -33,7 +34,8 @@ class CustomUserCreationForm(forms.Form):
     def save(self):
         username = self.cleaned_data['username']
         password = self.cleaned_data['password1']
-        user = User.objects.create_user(username=username, password=password)
+        User = get_user_model()
+        user = User.objects.create_user(username=username, password=password, role='expert')
         return user
 
 class ExpertRegistrationForm(forms.ModelForm):
